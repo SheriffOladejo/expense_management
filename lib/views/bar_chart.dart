@@ -13,9 +13,8 @@ class _BarChart extends StatelessWidget {
         titlesData: titlesData,
         borderData: borderData,
         barGroups: barGroups,
-        gridData: FlGridData(show: false),
-        alignment: BarChartAlignment.spaceAround,
-        maxY: 20,
+        gridData: FlGridData(show: true),
+        maxY: 1300000, // change to max amount spent in duration + 10%
       ),
     );
   }
@@ -35,7 +34,7 @@ class _BarChart extends StatelessWidget {
         return BarTooltipItem(
           rod.toY.round().toString(),
           const TextStyle(
-            color: Colors.cyan,
+            color: Colors.transparent,
             fontWeight: FontWeight.bold,
           ),
         );
@@ -43,34 +42,53 @@ class _BarChart extends StatelessWidget {
     ),
   );
 
-  Widget getTitles(double value, TitleMeta meta) {
+  String formatNumber(int number) {
+    if (number < 1000) {
+      return number.toString();
+    } else if (number < 1000000) {
+      double numInThousands = number / 1000;
+      return numInThousands.toStringAsFixed(1) + 'k';
+    } else if (number < 1000000000) {
+      double numInMillions = number / 1000000;
+      return numInMillions.toStringAsFixed(1) + 'm';
+    } else if (number < 1000000000000) {
+      double numInBillions = number / 1000000000;
+      return numInBillions.toStringAsFixed(1) + 'b';
+    } else {
+      double numInTrillions = number / 1000000000000;
+      return numInTrillions.toStringAsFixed(1) + 't';
+    }
+  }
+
+  Widget getBottomTitles(double value, TitleMeta meta) {
     final style = TextStyle(
-      color: Colors.blue,
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
+      color: Colors.white,
+      fontWeight: FontWeight.w500,
+      fontSize: 8,
+      fontFamily: 'satoshi-medium'
     );
     String text;
     switch (value.toInt()) {
       case 0:
-        text = 'Mn';
+        text = 'Mon';
         break;
       case 1:
-        text = 'Te';
+        text = 'Tue';
         break;
       case 2:
-        text = 'Wd';
+        text = 'Wed';
         break;
       case 3:
-        text = 'Tu';
+        text = 'Thu';
         break;
       case 4:
-        text = 'Fr';
+        text = 'Fri';
         break;
       case 5:
-        text = 'St';
+        text = 'Sat';
         break;
       case 6:
-        text = 'Sn';
+        text = 'Sun';
         break;
       default:
         text = '';
@@ -83,23 +101,47 @@ class _BarChart extends StatelessWidget {
     );
   }
 
+  Widget getLeftTitles(double value, TitleMeta meta) {
+    final style = TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+        fontSize: 6,
+        fontFamily: 'satoshi-bold'
+    );
+
+    String text = formatNumber(value.round());
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 0,
+      child: Text(text, style: style),
+    );
+  }
+
   FlTitlesData get titlesData => FlTitlesData(
     show: true,
     bottomTitles: AxisTitles(
       sideTitles: SideTitles(
         showTitles: true,
         reservedSize: 30,
-        getTitlesWidget: getTitles,
+        getTitlesWidget: getBottomTitles,
       ),
     ),
     leftTitles: AxisTitles(
-      sideTitles: SideTitles(showTitles: false),
-    ),
-    topTitles: AxisTitles(
-      sideTitles: SideTitles(showTitles: false),
+      sideTitles: SideTitles(
+        showTitles: true,
+        getTitlesWidget: getLeftTitles,
+      ),
     ),
     rightTitles: AxisTitles(
-      sideTitles: SideTitles(showTitles: false),
+      sideTitles: SideTitles(
+        showTitles: false,
+      ),
+    ),
+    topTitles: AxisTitles(
+      sideTitles: SideTitles(
+        showTitles: false,
+      ),
     ),
   );
 
@@ -109,8 +151,8 @@ class _BarChart extends StatelessWidget {
 
   LinearGradient get _barsGradient => LinearGradient(
     colors: [
-      Colors.cyan,
-      Colors.green,
+      Colors.white,
+      Colors.white,
     ],
     begin: Alignment.bottomCenter,
     end: Alignment.topCenter,
@@ -121,7 +163,7 @@ class _BarChart extends StatelessWidget {
       x: 0,
       barRods: [
         BarChartRodData(
-          toY: 8,
+          toY: 103430,
           gradient: _barsGradient,
         )
       ],
@@ -131,7 +173,7 @@ class _BarChart extends StatelessWidget {
       x: 1,
       barRods: [
         BarChartRodData(
-          toY: 10,
+          toY:450323.6,
           gradient: _barsGradient,
         )
       ],
@@ -141,7 +183,7 @@ class _BarChart extends StatelessWidget {
       x: 2,
       barRods: [
         BarChartRodData(
-          toY: 14,
+          toY: 214530,
           gradient: _barsGradient,
         )
       ],
@@ -151,7 +193,7 @@ class _BarChart extends StatelessWidget {
       x: 3,
       barRods: [
         BarChartRodData(
-          toY: 15,
+          toY: 504540,
           gradient: _barsGradient,
         )
       ],
@@ -161,7 +203,7 @@ class _BarChart extends StatelessWidget {
       x: 4,
       barRods: [
         BarChartRodData(
-          toY: 13,
+          toY: 802320,
           gradient: _barsGradient,
         )
       ],
@@ -171,7 +213,7 @@ class _BarChart extends StatelessWidget {
       x: 5,
       barRods: [
         BarChartRodData(
-          toY: 10,
+          toY: 1201210,
           gradient: _barsGradient,
         )
       ],
@@ -181,7 +223,7 @@ class _BarChart extends StatelessWidget {
       x: 6,
       barRods: [
         BarChartRodData(
-          toY: 16,
+          toY: 550343,
           gradient: _barsGradient,
         )
       ],
