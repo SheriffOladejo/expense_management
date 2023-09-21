@@ -1,12 +1,21 @@
 import 'package:expense_management/models/category.dart';
+import 'package:expense_management/utils/methods.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AllocateAdapter extends StatefulWidget {
 
   Category category;
+  Function removeCallback;
+  double budget;
+  double totalBudget;
+  String currency;
+
   AllocateAdapter({
     this.category,
+    this.totalBudget,
+    this.removeCallback,
+    this.currency,
   });
 
   @override
@@ -16,7 +25,7 @@ class AllocateAdapter extends StatefulWidget {
 
 class _AllocateAdapterState extends State<AllocateAdapter> {
 
-  final budgetController = TextEditingController();
+  final budgetController = TextEditingController(text: "1");
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +59,20 @@ class _AllocateAdapterState extends State<AllocateAdapter> {
                 fontFamily: 'satoshi-regular',
                 color: Colors.black
               ),
+              onChanged: (value) {
+                if (double.parse(value) > widget.totalBudget) {
+                  showToast("${widget.category.title} budget cannot be more than total budget");
+                }
+                else {
+                  widget.budget = double.parse(value);
+                }
+              },
               keyboardType: TextInputType.number, // This sets the keyboard type to numeric
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9]')), // Only allow numeric input
               ],
               decoration: InputDecoration(
-                hintText: '#0.0',
+                hintText: '${widget.currency} 0.0',
                 hintStyle: TextStyle(
                   fontWeight: FontWeight.w400,
                   fontSize: 14,
@@ -66,10 +83,25 @@ class _AllocateAdapterState extends State<AllocateAdapter> {
                 border: InputBorder.none,
               ),
             ),
-          )
+          ),
+          Container(width: 30,),
+          GestureDetector(
+            onTap: () async {
+              await widget.removeCallback(widget.category.id);
+            },
+            child: Icon(Icons.close, color: Colors.black,),
+          ),
+          Container(width: 10,),
         ],
       ),
     );
+  }
+
+  double getBudget () {
+    if (budgetController.text.isNotEmpty) {
+      return double.parse(budgetController.text);
+    }
+    return 0;
   }
 
 }

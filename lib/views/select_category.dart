@@ -1,5 +1,6 @@
 import 'package:expense_management/adapters/category_adapter2.dart';
 import 'package:expense_management/models/category.dart';
+import 'package:expense_management/utils/methods.dart';
 import 'package:expense_management/views/add_category.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -76,14 +77,7 @@ class _SelectCategoryState extends State<SelectCategory> {
   }
 
   Future<void> init () async {
-    categoryList.add(Category(emoji: "🛒", title: "Groceries"));
-    categoryList.add(Category(emoji: "🍛", title: "Food"));
-    categoryList.add(Category(emoji: "⚡️", title: "Electricity"));
-    categoryList.add(Category(emoji: "🌐", title: "Internet"));
-    categoryList.add(Category(emoji: "⛽️", title: "Fuel"));
-    categoryList.add(Category(emoji: "✈️️", title: "Transport"));
-    categoryList.add(Category(emoji: "🏠️", title: "Rent"));
-    categoryList.add(Category(emoji: "💰️", title: "Charity"));
+    categoryList = await getCategories();
     setState(() {
 
     });

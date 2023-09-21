@@ -1,5 +1,8 @@
+import 'package:expense_management/models/category.dart';
+import 'package:expense_management/utils/db_helper.dart';
 import 'package:expense_management/utils/hex_color.dart';
 import 'package:expense_management/views/create_account.dart';
+import 'package:expense_management/views/login.dart';
 import 'package:flutter/material.dart';
 
 class ExpenseGetStarted extends StatefulWidget {
@@ -8,6 +11,9 @@ class ExpenseGetStarted extends StatefulWidget {
 }
 
 class _ExpenseGetStartedState extends State<ExpenseGetStarted> {
+
+  var db_helper = DbHelper();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +79,7 @@ class _ExpenseGetStartedState extends State<ExpenseGetStarted> {
                 height: 45,
                 color: HexColor("#FFFFFF"),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateAccount()));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CreateAccount()));
                 },
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(3))),
@@ -109,7 +115,7 @@ class _ExpenseGetStartedState extends State<ExpenseGetStarted> {
               padding: const EdgeInsets.only(left: 10, right: 10),
               child: ElevatedButton(
                 onPressed: () {
-
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
                 },
                 style: ElevatedButton.styleFrom(
                   primary: HexColor("#206CDF"),
@@ -138,4 +144,15 @@ class _ExpenseGetStartedState extends State<ExpenseGetStarted> {
       ),
     );
   }
+
+  Future<void> init () async {
+
+  }
+
+  @override
+  void initState () {
+    super.initState();
+    init();
+  }
+
 }

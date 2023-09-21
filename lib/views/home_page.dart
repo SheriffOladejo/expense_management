@@ -21,6 +21,8 @@ class _HomePageState extends State<HomePage> {
 
   double total_spent = 0;
 
+  DateTime selectedDate = DateTime.now();
+
   final Map<String, double> dataMap = {
     "Groceries": 100.8,
     "Fuel": 160.5,
@@ -87,153 +89,162 @@ class _HomePageState extends State<HomePage> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  child: Column(
+                  child: Stack(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
                         children: [
-                          const Text(
-                            "Balance",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'satoshi-medium',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                color: HexColor("#4DFFFFFF"),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(24))),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  "Sep 2023",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: 'satoshi-regular',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                "Balance",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'satoshi-medium',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  selectDate(context);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                      color: HexColor("#4DFFFFFF"),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(24))),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Sep 2023",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w400,
+                                          fontFamily: 'satoshi-regular',
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 5,
+                                      ),
+                                      Icon(
+                                        CupertinoIcons.chevron_down,
+                                        size: 12,
+                                        color: Colors.white,
+                                      )
+                                    ],
                                   ),
                                 ),
-                                Container(
-                                  width: 5,
-                                ),
-                                Icon(
-                                  CupertinoIcons.chevron_down,
-                                  size: 12,
-                                  color: Colors.white,
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        alignment: Alignment.centerLeft,
-                        child: const Text(
-                          "\$100000.98",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'satoshi-bold',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 30,
+                              )
+                            ],
                           ),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            alignment: Alignment.centerLeft,
+                            child: const Text(
+                              "\$100000.98",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'satoshi-bold',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 30,
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "Budget",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: 'satoshi-regular',
-                                ),
+                              Column(
+                                children: [
+                                  const Text(
+                                    "Budget",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'satoshi-regular',
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 5,
+                                  ),
+                                  const Text(
+                                    "\$1000.98",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'satoshi-bold',
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ],
                               ),
                               Container(
-                                height: 5,
+                                width: 1,
+                                height: 50,
+                                color: Colors.white,
                               ),
-                              const Text(
-                                "\$1000.98",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'satoshi-bold',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                ),
+                              Column(
+                                children: [
+                                  const Text(
+                                    "Spent",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'satoshi-regular',
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 5,
+                                  ),
+                                  const Text(
+                                    "\$500.98",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'satoshi-bold',
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                           Container(
-                            width: 1,
-                            height: 50,
-                            color: Colors.white,
+                            height: 16,
                           ),
-                          Column(
-                            children: [
-                              const Text(
-                                "Spent",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: 'satoshi-regular',
-                                ),
-                              ),
-                              Container(
-                                height: 5,
-                              ),
-                              const Text(
-                                "\$500.98",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'satoshi-bold',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ],
-                          ),
+                          Container(
+                              padding: const EdgeInsets.only(top: 10),
+                              width: MediaQuery.of(context).size.width,
+                              alignment: Alignment.center,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Text(
+                                    "View insight",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'satoshi-regular',
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Icon(
+                                    CupertinoIcons.chevron_right,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              )),
                         ],
                       ),
-                      Container(
-                        height: 16,
-                      ),
-                      Container(
-                          padding: const EdgeInsets.only(top: 10),
-                          width: MediaQuery.of(context).size.width,
-                          alignment: Alignment.center,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Text(
-                                "View insight",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'satoshi-regular',
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Icon(
-                                CupertinoIcons.chevron_right,
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                            ],
-                          )),
                     ],
-                  ),
+                  )
                 ),
                 Container(
                   height: 10,
@@ -390,6 +401,29 @@ class _HomePageState extends State<HomePage> {
           ),
         ));
   }
+
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // Specify the initial date
+      firstDate: DateTime(2000), // Specify the first allowable date
+      lastDate: DateTime(2101), // Specify the last allowable date
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light(), // Customize the date picker theme
+          child: child,
+        );
+      },
+    );
+
+    if (picked != null && picked != selectedDate) {
+      // User has selected a date
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
 
   Future<void> init() async {
     categoryList.add(Category(emoji: "🛒", title: "Groceries"));

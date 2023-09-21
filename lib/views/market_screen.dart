@@ -5,9 +5,8 @@ import 'package:expense_management/utils/db_helper.dart';
 import 'package:expense_management/utils/hex_color.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_management/adapters/market_adapter.dart';
-import 'package:expense_management/models/candle_data.dart';
 import 'package:http/http.dart' as http;
-import 'package:expense_management/utils/db_helper.dart';
+
 
 class MarketScreen extends StatefulWidget {
   const MarketScreen({Key key}) : super(key: key);
@@ -31,6 +30,7 @@ class _MarketScreenState extends State<MarketScreen> {
   bool is_loading = false;
   List<CandleData> search_list = [];
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +39,7 @@ class _MarketScreenState extends State<MarketScreen> {
         appBar: AppBar(
           backgroundColor: HexColor("#0F0F0F"),
           elevation: 0,
-          title: Text("Charts", style: TextStyle(
+          title: Text("", style: TextStyle(
             color: Colors.white,
             fontFamily: 'inter-bold',
             fontSize: 20,

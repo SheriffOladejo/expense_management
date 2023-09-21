@@ -1,3 +1,5 @@
+import 'package:expense_management/models/category.dart';
+import 'package:expense_management/utils/db_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:expense_management/utils/hex_color.dart';
@@ -90,3 +92,18 @@ String formatMoney(double amount) {
   final formatter = NumberFormat('#,##0.00', 'en_US'); // Adjust the locale as needed
   return formatter.format(amount);
 }
+
+bool isEmailValid(String email) {
+  final RegExp emailPattern = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+  return emailPattern.hasMatch(email);
+}
+
+Future<List<Category>> getCategories () async {
+
+  var db_helper = DbHelper();
+  List<Category> categoryList = await db_helper.getCategories();
+
+
+  return categoryList;
+}
+

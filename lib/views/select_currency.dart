@@ -1,5 +1,7 @@
 import 'package:expense_management/models/currency.dart';
+import 'package:expense_management/utils/db_helper.dart';
 import 'package:expense_management/utils/hex_color.dart';
+import 'package:expense_management/utils/methods.dart';
 import 'package:expense_management/views/new_budget.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +15,12 @@ class SelectCurrency extends StatefulWidget {
 class _SelectCurrencyState extends State<SelectCurrency> {
 
   List<Currency> currencies = [];
+
+  String selected_currency = "";
+
+  String text = "";
+
+  var db_helper = DbHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +36,7 @@ class _SelectCurrencyState extends State<SelectCurrency> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text("Select base currency", style: TextStyle(
+            const Text("Select base currency", style: TextStyle(
               color: Colors.black,
               fontSize: 20,
               fontFamily: 'satoshi-medium',
@@ -37,40 +45,37 @@ class _SelectCurrencyState extends State<SelectCurrency> {
             Container(height: 35,),
             Image.asset("assets/images/amico.png",),
             Container(height: 15,),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.only(left: 15, right: 15),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SelectCurrencyDialog(callback: callback,);
+                  },
+                );
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                margin: const EdgeInsets.only(left: 15, right: 15),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.grey,
+                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(3)),
                 ),
-                borderRadius: BorderRadius.all(Radius.circular(3)),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: DropdownButton<String>(
-                    hint: Text("Select a currency", style: TextStyle(
+                padding: const EdgeInsets.all(15),
+                child: Row(
+                  children: [
+                    Text(selected_currency == "" ? "Select a currency" : text, style: const TextStyle(
                       color: Colors.black,
                       fontSize: 20,
                       fontFamily: 'satoshi-medium',
                       fontWeight: FontWeight.w600,
                     ),),
-                    value: null,
-                    onChanged: (String newValue) {
-
-                    },
-                    items: currencies.map<DropdownMenuItem<String>>((Currency currency) {
-                      return DropdownMenuItem<String>(
-                        value: currency.cc,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width - 100,
-                          child: Text('${currency.name} - ${currency.symbol}')
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                    const Spacer(),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
+                )
               ),
             ),
             Container(height: 15,),
@@ -80,8 +85,16 @@ class _SelectCurrencyState extends State<SelectCurrency> {
                 minWidth: MediaQuery.of(context).size.width,
                 height: 45,
                 color: HexColor("#206CDF"),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => NewBudget()));
+                onPressed: () async {
+                  if (selected_currency == "") {
+                    showToast("Select a currency");
+                  }
+                  else {
+                    var user = await db_helper.getUser();
+                    user.currency = selected_currency;
+                    await db_helper.updateUser(user);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => NewBudget()));
+                  }
                 },
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(3))),
@@ -109,7 +122,7 @@ class _SelectCurrencyState extends State<SelectCurrency> {
               ),
             ),
             Container(height: 20,),
-            Text("Your base currency should be the one you use most often. Your balance and stats will be shown in this currency",
+            const Text("Your base currency should be the one you use most often. Your balance and stats will be shown in this currency",
             style: TextStyle(
               color: Colors.grey,
               fontWeight: FontWeight.w500,
@@ -124,12 +137,16 @@ class _SelectCurrencyState extends State<SelectCurrency> {
     );
   }
 
-  Future<void> init () async {
-    fetchCurrencies().then((currencies) {
-      setState(() {
-        this.currencies = currencies;
-      });
+  Future<void> callback (currencyCode, String name) async {
+    setState(() {
+      selected_currency = currencyCode;
     });
+
+    text = selected_currency + " - " + name;
+  }
+
+  Future<void> init () async {
+
   }
 
   @override
@@ -142,14 +159,20 @@ class _SelectCurrencyState extends State<SelectCurrency> {
 
 class SelectCurrencyDialog extends StatefulWidget {
 
+  String selectedCurrency = 'USD';
+  String name = "";
+  Function callback;
+
+  SelectCurrencyDialog({
+    this.callback
+  });
+
   @override
   State<SelectCurrencyDialog> createState() => _SelectCurrencyDialogState();
 
 }
 
 class _SelectCurrencyDialogState extends State<SelectCurrencyDialog> {
-
-  String selectedCurrency = 'USD';
 
   List<Map<String, String>> currencies = [
     {'code': 'USD', 'name': 'United States Dollars'},
@@ -168,55 +191,70 @@ class _SelectCurrencyDialogState extends State<SelectCurrencyDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Choose your currency'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Divider(),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: currencies.length,
-            itemBuilder: (context, index) {
-              final currency = currencies[index];
-              final currencyCode = currency['code'];
-              final currencyName = currency['name'];
+      title: const Text('Choose your currency'),
+      content: Container(
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Divider(),
+            Container(
+              height: MediaQuery.of(context).size.height - 260,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: currencies.length,
+                itemBuilder: (context, index) {
+                  final currency = currencies[index];
+                  final currencyCode = currency['code'];
+                  final currencyName = currency['name'];
 
-              return ListTile(
-                title: Text('$currencyCode - $currencyName'),
-                leading: Radio<String>(
-                  value: currencyCode,
-                  groupValue: selectedCurrency,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedCurrency = value;
-                    });
+                  return ListTile(
+                    title: Text('$currencyCode - $currencyName', style: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'inter-regular',
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                    ),),
+                    leading: Radio<String>(
+                      value: currencyCode,
+                      groupValue: widget.selectedCurrency,
+                      onChanged: (value) {
+                        setState(() {
+                          widget.selectedCurrency = value;
+                          widget.name = currencies[index]["name"];
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            const Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
                   },
+                  child: const Text('Cancel'),
                 ),
-              );
-            },
-          ),
-          Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-                child: Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle the selected currency (selectedCurrency)
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        ],
+                TextButton(
+                  onPressed: () {
+                    widget.callback(widget.selectedCurrency, widget.name);
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
+
+
+
 }
 

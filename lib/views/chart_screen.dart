@@ -58,12 +58,6 @@ class _ChartScreenState extends State<ChartScreen> {
           ),
         ),
         actions: [
-          GestureDetector(
-            onTap: () {
-              getCandleData();
-            },
-            child: Icon(Icons.refresh, color: Colors.white, size: 24,),
-          ),
           Container(width: 15,),
         ],
         centerTitle: true,
@@ -71,181 +65,182 @@ class _ChartScreenState extends State<ChartScreen> {
       body: SingleChildScrollView(
         child: is_loading ? Center(child: Padding(
             padding: const EdgeInsets.only(top: 70),
-            child: CircularProgressIndicator())) :  Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.network(widget.data.image, width: 32, height: 32,),
-              Container(height: 15,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selected_duration = "1H";
-                        interval = "1m";
-                      });
-                      await getCandleDataSQLite();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: selected_duration == "1H" ? HexColor(selected_duration_color) : HexColor(background_color),
-                      child: Center(
-                        child: Text(
-                          "1H",
-                          style: TextStyle(
-                              fontFamily: 'inter-regular',
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: selected_duration == "1H" ? Colors.black : Colors.white
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selected_duration = "24H";
-                        interval = "30m";
-                      });
-                      await getCandleDataSQLite();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: selected_duration == "24H" ? HexColor(selected_duration_color) : HexColor(background_color),
-                      child: Center(
-                        child: Text(
-                          "24H",
-                          style: TextStyle(
-                              fontFamily: 'inter-regular',
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: selected_duration == "24H" ? Colors.black : Colors.white
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selected_duration = "1W";
-                        interval = "2h";
-                      });
-                      await getCandleDataSQLite();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: selected_duration == "1W" ? HexColor(selected_duration_color) : HexColor(background_color),
-                      child: Center(
-                        child: Text(
-                          "1W",
-                          style: TextStyle(
-                              fontFamily: 'inter-regular',
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: selected_duration == "1W" ? Colors.black : Colors.white
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selected_duration = "1M";
-                        interval = "8h";
-                      });
-                      await getCandleDataSQLite();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: selected_duration == "1M" ? HexColor(selected_duration_color) : HexColor(background_color),
-                      child: Center(
-                        child: Text(
-                          "1M",
-                          style: TextStyle(
-                              fontFamily: 'inter-regular',
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: selected_duration == "1M" ? Colors.black : Colors.white
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selected_duration = "6M";
-                        interval = "3d";
-                      });
-                      await getCandleDataSQLite();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: selected_duration == "6M" ? HexColor(selected_duration_color) : HexColor(background_color),
-                      child: Center(
-                        child: Text(
-                          "6M",
-                          style: TextStyle(
-                              fontFamily: 'inter-regular',
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: selected_duration == "6M" ? Colors.black : Colors.white
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selected_duration = "1Y";
-                        interval = "1w";
-                      });
-                      await getCandleDataSQLite();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: selected_duration == "1Y" ? HexColor(selected_duration_color) : HexColor(background_color),
-                      child: Center(
-                        child: Text(
-                          "1Y",
-                          style: TextStyle(
-                              fontFamily: 'inter-regular',
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: selected_duration == "1Y" ? Colors.black : Colors.white
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Container(height: 10,),
-              is_loading ? SizedBox(height: 355, child: loadingPage()) : candle_list.isEmpty ? const SizedBox(
-                height: 410,
-                child: Center(child: Text("No chart data available", style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'inter-medium',
-                  fontSize: 16,
-                ),)),
-              ) : Expanded(child: Container(color: HexColor("#0F0F0F"),child: Candlesticks(candles: candle_list))),
-              Container(height: 8,),
-              Container(
-                padding: const EdgeInsets.all(15),
-                child: Column(
+            child: CircularProgressIndicator())) :
+        Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.network(widget.data.image, width: 32, height: 32,),
+                Container(height: 15,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    priceWidget(),
-                    marketCapWidget(),
-                    supplyWidget()
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          selected_duration = "1H";
+                          interval = "1m";
+                        });
+                        await getCandleDataSQLite();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: selected_duration == "1H" ? HexColor(selected_duration_color) : HexColor(background_color),
+                        child: Center(
+                          child: Text(
+                            "1H",
+                            style: TextStyle(
+                                fontFamily: 'inter-regular',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: selected_duration == "1H" ? Colors.black : Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          selected_duration = "24H";
+                          interval = "30m";
+                        });
+                        await getCandleDataSQLite();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: selected_duration == "24H" ? HexColor(selected_duration_color) : HexColor(background_color),
+                        child: Center(
+                          child: Text(
+                            "24H",
+                            style: TextStyle(
+                                fontFamily: 'inter-regular',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: selected_duration == "24H" ? Colors.black : Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          selected_duration = "1W";
+                          interval = "2h";
+                        });
+                        await getCandleDataSQLite();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: selected_duration == "1W" ? HexColor(selected_duration_color) : HexColor(background_color),
+                        child: Center(
+                          child: Text(
+                            "1W",
+                            style: TextStyle(
+                                fontFamily: 'inter-regular',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: selected_duration == "1W" ? Colors.black : Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          selected_duration = "1M";
+                          interval = "8h";
+                        });
+                        await getCandleDataSQLite();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: selected_duration == "1M" ? HexColor(selected_duration_color) : HexColor(background_color),
+                        child: Center(
+                          child: Text(
+                            "1M",
+                            style: TextStyle(
+                                fontFamily: 'inter-regular',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: selected_duration == "1M" ? Colors.black : Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          selected_duration = "6M";
+                          interval = "3d";
+                        });
+                        await getCandleDataSQLite();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: selected_duration == "6M" ? HexColor(selected_duration_color) : HexColor(background_color),
+                        child: Center(
+                          child: Text(
+                            "6M",
+                            style: TextStyle(
+                                fontFamily: 'inter-regular',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: selected_duration == "6M" ? Colors.black : Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          selected_duration = "1Y";
+                          interval = "1w";
+                        });
+                        await getCandleDataSQLite();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: selected_duration == "1Y" ? HexColor(selected_duration_color) : HexColor(background_color),
+                        child: Center(
+                          child: Text(
+                            "1Y",
+                            style: TextStyle(
+                                fontFamily: 'inter-regular',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: selected_duration == "1Y" ? Colors.black : Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              )
-            ],
+                Container(height: 10,),
+                is_loading ? SizedBox(height: 355, child: loadingPage()) : candle_list.isEmpty ? const SizedBox(
+                  height: 410,
+                  child: Center(child: Text("No chart data available", style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'inter-medium',
+                    fontSize: 16,
+                  ),)),
+                ) : Expanded(child: Container(color: HexColor("#0F0F0F"),child: Candlesticks(candles: candle_list))),
+                Container(height: 8,),
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    children: [
+                      priceWidget(),
+                      marketCapWidget(),
+                      supplyWidget()
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
       ),
     );
   }
@@ -684,10 +679,10 @@ class _ChartScreenState extends State<ChartScreen> {
   }
 
   Future<void> getCandleDataSQLite() async {
-    is_connected = await checkConnection();
     setState(() {
       is_loading = true;
     });
+    is_connected = await checkConnection();
     candle_data_list = await db_helper.getCandleData(selected_symbol, selected_duration);
     if(candle_data_list.isNotEmpty){
       candle_list.clear();

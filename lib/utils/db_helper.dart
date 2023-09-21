@@ -1,3 +1,7 @@
+import 'package:expense_management/models/budget.dart';
+import 'package:expense_management/models/category.dart';
+import 'package:expense_management/models/user.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:expense_management/models/candle_data.dart';
@@ -8,7 +12,7 @@ import 'package:candlesticks/candlesticks.dart';
 class DbHelper {
   DbHelper._createInstance();
 
-  String db_name = "walletApp.db";
+  String db_name = "expense_app.db";
 
   static Database _database;
   static DbHelper helper;
@@ -48,8 +52,43 @@ class DbHelper {
   String col_candle_atl_date = "atl_date";
   String col_candle_max_supply = "max_supply";
 
+  String user_table = "user_table";
+  String col_user_id = "id";
+  String col_username = "username";
+  String col_user_email = "email";
+  String col_user_password = "password";
+  String col_user_currency = "currency";
+
+  String budget_table = "budget_table";
+  String col_budget_id = "id";
+  String col_budget_start = "startDate";
+  String col_budget_end = "endDate";
+  String col_budget_initial_balance = "initial_balance";
+  String col_budget_budget = "budget";
+
+  String category_table = "category_table";
+  String col_cat_id = "id";
+  String col_cat_title = "title";
+  String col_cat_emoji = "emoji";
+  String col_cat_budget = "budget";
+  String col_cat_spent = "spent";
 
   Future createDb(Database db, int version) async {
+
+    String create_budget_table = "create table $budget_table ("
+        "$col_budget_id integer,"
+        "$col_budget_budget double,"
+        "$col_budget_initial_balance double,"
+        "$col_budget_end integer,"
+        "$col_budget_start integer)";
+
+    String create_user_table = "create table $user_table ("
+        "$col_user_id text,"
+        "$col_username text,"
+        "$col_user_email text,"
+        "$col_user_password text,"
+        "$col_user_currency text)";
+
     String create_wallet_table = "create table $wallet_table ("
         "$col_wallet_id integer primary key autoincrement,"
         "$col_wallet_passphrase text,"
@@ -85,8 +124,20 @@ class DbHelper {
         "market_cap double,"
         "market_cap_rank integer)";
 
+    String create_cat_table = "create table $category_table ("
+        "$col_cat_id integer,"
+        "$col_cat_title text,"
+        "$col_cat_emoji text,"
+        "$col_cat_budget double,"
+        "$col_cat_spent double)";
+
+    await db.execute(create_cat_table);
+    await db.execute(create_budget_table);
     await db.execute(create_wallet_table);
     await db.execute(create_candle_table);
+    await db.execute(create_user_table);
+
+
   }
 
   factory DbHelper(){
@@ -107,6 +158,202 @@ class DbHelper {
     final db_path = await getDatabasesPath();
     final path = join(db_path, db_name);
     return await openDatabase(path, version: 1, onCreate: createDb);
+  }
+
+  Future<void> saveCategory (Category cat) async {
+    Database db = await database;
+    String query = "insert into $category_table ($col_cat_id, $col_cat_title, $col_cat_emoji, "
+        "$col_cat_budget, $col_cat_spent) values (${cat.id}, '${cat.title}', '${cat.emoji}', ${cat.budget}, ${cat.spent})";
+    final params = {
+      "id": cat.id.toString(),
+      "title": cat.title,
+      "emoji": cat.emoji,
+      "budget": cat.budget.toString(),
+      "spent": cat.spent.toString(),
+    };
+    User user = await getUser();
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/categories/${cat.id.toString()}');
+    try {
+      await db.execute(query);
+      await databaseReference.set(params);
+      return true;
+    }
+    catch(e) {
+      showToast("Category not saved");
+      return false;
+    }
+  }
+
+  Future<List<Category>> getCategoriesFB () async {
+    List<Category> list = [];
+    var user = await getUser();
+    DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/categories');
+    DataSnapshot snapshot = await databaseReference.get();
+    Map<dynamic, dynamic> values = snapshot.value;
+
+    if (values != null) {
+      values.forEach((key, value) async {
+        if (value is Map && value.containsKey('budget')) {
+          double budget = double.parse(value['budget']);
+          double spent = double.parse(value['spent']);
+          int id = int.parse(value['id']);
+          String title = value['title'];
+          String emoji = value['emoji'];
+
+          list.add(
+            Category(
+              budget: budget,
+              spent: spent,
+              id: id,
+              title: title,
+              emoji: emoji,
+            )
+          );
+        }
+      });
+    }
+
+    return list;
+
+  }
+
+  Future<List<Category>> getCategories () async {
+    List<Category> list = [];
+    Database db = await database;
+    String query = "select * from $category_table";
+    List<Map<String, Object>> result = await db.rawQuery(query);
+    print(result.length);
+    for (var i = 0; i < result.length; i++) {
+      list.add(
+        Category(
+            id: result[i][col_cat_id],
+            emoji: result[i][col_cat_emoji],
+            budget: result[i][col_cat_budget],
+            title: result[i][col_cat_title],
+            spent: result[i][col_cat_spent],
+          )
+      );
+    }
+    return list;
+  }
+
+  Future<void> updateCategory (Category cat) async {
+    User user = await getUser();
+    Database db = await database;
+    String query = "update $category_table set $col_cat_budget = ${cat.budget}, $col_cat_spent=${cat.spent} where "
+        "$col_cat_id = ${cat.id}";
+    final params = {
+      "spent": cat.spent == null ? 0 :  cat.spent.toStringAsFixed(1),
+      "budget": cat.budget == null ? 0 : cat.budget.toStringAsFixed(1),
+    };
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/categories/${cat.id}');
+
+    try {
+      await db.execute(query);
+      await databaseReference.update(params);
+      return true;
+    }
+    catch(e) {
+      showToast("Budget not saved");
+      return false;
+    }
+  }
+
+  Future<void> saveBudget (Budget budget) async {
+    Database db = await database;
+    String query = "insert into $budget_table ($col_budget_id, $col_budget_start, $col_budget_end, $col_budget_budget, $col_budget_initial_balance) values ("
+        "${budget.id}, ${budget.startDate}, ${budget.endDate}, ${budget.budget}, ${budget.initialBalance})";
+    final params = {
+      "id": budget.id.toString(),
+      "startDate": budget.startDate.toString(),
+      "endDate": budget.endDate.toString(),
+      "budget": budget.budget.toString(),
+      "initialBalance": budget.initialBalance.toString(),
+    };
+    User user = await getUser();
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/budgets/${budget.id.toString()}');
+    try {
+      await db.execute(query);
+      await databaseReference.set(params);
+      return true;
+    }
+    catch(e) {
+      showToast("Budget not saved");
+      return false;
+    }
+  }
+
+  Future<List<Budget>> getBudgets () async {
+    List<Budget> budgets = [];
+    Database db = await database;
+    String query = "select * from $budget_table order by $col_budget_end desc";
+    List<Map<String, Object>> result = await db.rawQuery(query);
+    for (var i = 0; i < result.length; i++) {
+      budgets.add(
+        Budget(
+          id: result[i][col_budget_id],
+          initialBalance: result[i][col_budget_initial_balance],
+          budget: result[i][col_budget_budget],
+          startDate: result[i][col_budget_start],
+          endDate: result[i][col_budget_end],
+        )
+      );
+    }
+    return budgets;
+  }
+
+  Future<void> saveUser (User user) async {
+    Database db = await database;
+    String query = "insert into $user_table ($col_user_id, $col_username, $col_user_password, "
+        "$col_user_email, $col_user_currency) values ('${user.id}', '${user.username}', '${user.password}', "
+        "'${user.email}', '${user.currency}')";
+    try {
+      await db.execute(query);
+      return true;
+    }
+    catch(e) {
+      showToast("User not saved");
+      return false;
+    }
+  }
+
+  Future<User> getUser () async {
+    User user;
+    Database db = await database;
+    String query = "select * from $user_table";
+    List<Map<String, Object>> result = await db.rawQuery(query);
+    for (var i = 0; i < result.length; i++) {
+      user = User(
+        username: result[i][col_username],
+        password: result[i][col_user_password],
+        currency: result[i][col_user_currency],
+        email: result[i][col_user_email],
+        id: result[i][col_user_id],
+      );
+    }
+    return user;
+  }
+
+  Future<void> updateUser (User user) async {
+    Database db = await database;
+    String query = "update $user_table set $col_user_email = '${user.email}', $col_user_currency = '${user.currency}', "
+        "$col_user_password = '${user.password}', $col_username = '${user.username}' where $col_user_id = '${user.id}'";
+    final map = {
+      "name": user.username,
+      "email": user.email,
+      "password": user.password,
+      "currency": user.currency
+    };
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.reference().child('data/users/${user.id}');
+    try {
+      await db.execute(query);
+      await databaseReference.update(map);
+      return true;
+    }
+    catch(e) {
+      showToast("User not updated");
+      return false;
+    }
   }
 
   Future<void> clearCandleTable() async {
