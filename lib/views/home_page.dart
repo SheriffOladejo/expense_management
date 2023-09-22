@@ -1,61 +1,103 @@
 import 'package:expense_management/adapters/activity_adapter.dart';
 import 'package:expense_management/adapters/category_adapter.dart';
 import 'package:expense_management/adapters/pie_desc.dart';
+import 'package:expense_management/models/activity.dart';
+import 'package:expense_management/models/budget.dart';
 import 'package:expense_management/models/category.dart';
 import 'package:expense_management/models/pie_desc_item.dart';
 import 'package:expense_management/models/user.dart';
+import 'package:expense_management/utils/db_helper.dart';
 import 'package:expense_management/utils/hex_color.dart';
 import 'package:expense_management/utils/methods.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
 
 class HomePage extends StatefulWidget {
+
+  Function insightCallback;
+  HomePage({
+    this.insightCallback,
+  });
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   User user;
-  List categoryList = [];
 
   double total_spent = 0;
+  double balance;
+  List<Category> categories = [];
+  List<Activity> activities = [];
+  List<Activity> catActivity = [];
+
+  Category selectedCategory;
+
+  Budget budget;
+  double remaining;
+
+  var db_helper = DbHelper();
 
   DateTime selectedDate = DateTime.now();
+  String formattedDate;
 
-  final Map<String, double> dataMap = {
-    "Groceries": 100.8,
-    "Fuel": 160.5,
-    "Food": 300.2,
-    "Electricity": 240.7,
-    "Internet": 80.9,
-  };
+  bool is_loading = false;
 
-  final List<PieDescItem> _dataList = [
-    PieDescItem(
-        id: 0, color: "#7F56D9", category: "Groceries", total_spent: 1000.0),
-    PieDescItem(
-      id: 1, color: "#9AE419", category: "Fuel", total_spent: 160.5
-    ),
-    PieDescItem(
-      id: 2, color: "#F8312F", category: "Food", total_spent: 300.2
-    ),
-    PieDescItem(
-        id: 3, color: "#4287f5", category: "Electricity", total_spent: 240.7),
-    PieDescItem(
-        id: 4, color: "#00C3C3", category: "Internet", total_spent: 80.9),
-  ];
+  final Map<String, double> dataMap = {};
 
-  final colorList = [
+  final List<PieDescItem> _dataList = [];
+
+  final myColorList = [
     HexColor("#7F56D9"),
     HexColor("#9AE419"),
     HexColor("#F8312F"),
-    HexColor("#4287f5"),
+    HexColor("#4287F5"),
     HexColor("#00C3C3"),
+    HexColor("#FF6B6B"),
+    HexColor("#4CAF50"),
+    HexColor("#FFC107"),
+    HexColor("#673AB7"),
+    HexColor("#FF5722"),
+    HexColor("#795548"),
+    HexColor("#9C27B0"),
+    HexColor("#2196F3"),
+    HexColor("#607D8B"),
+    HexColor("#E91E63"),
   ];
+
+
+  List<HexColor> colorList = [];
+
+  Future<void> catCallback (Category cat) {
+    selectedCategory = cat;
+    filterActivities();
+    setState(() {
+
+    });
+  }
+
+  Category selectionCallback () {
+    return selectedCategory;
+  }
+
+  Future<void> filterActivities () {
+    catActivity.clear();
+    for (var i = 0; i < activities.length; i++) {
+      if (activities[i].id == selectedCategory.id) {
+        catActivity.add(activities[i]);
+      }
+    }
+    setState(() {
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    formattedDate = DateFormat('MMM d').format(selectedDate);
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -73,179 +115,184 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: CustomScrollView(
+          child: is_loading ? Center(child: CircularProgressIndicator(),) : CustomScrollView(
             slivers: [
               SliverList(
                   delegate: SliverChildListDelegate([
                 Container(
-                  margin: const EdgeInsets.all(15),
-                  padding: const EdgeInsets.all(15),
-                  width: MediaQuery.of(context).size.width,
-                  height: 200,
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/home-tab-bg.png'),
-                      fit: BoxFit.cover,
+                    margin: const EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(15),
+                    width: MediaQuery.of(context).size.width,
+                    height: 200,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/home-tab-bg.png'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "Balance",
+                    child: Stack(
+                      children: [
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Balance",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'satoshi-medium',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    selectDate(context);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        color: HexColor("#4DFFFFFF"),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(24))),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "$formattedDate",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: 'satoshi-regular',
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 5,
+                                        ),
+                                        Icon(
+                                          CupertinoIcons.chevron_down,
+                                          size: 12,
+                                          color: Colors.white,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "${user.currency} ${balance.toStringAsFixed(1)}",
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'satoshi-medium',
-                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'satoshi-bold',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 30,
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  selectDate(context);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                      color: HexColor("#4DFFFFFF"),
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(24))),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Sep 2023",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w400,
-                                          fontFamily: 'satoshi-regular',
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 5,
-                                      ),
-                                      Icon(
-                                        CupertinoIcons.chevron_down,
-                                        size: 12,
-                                        color: Colors.white,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width,
-                            alignment: Alignment.centerLeft,
-                            child: const Text(
-                              "\$100000.98",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'satoshi-bold',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 30,
                               ),
                             ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                children: [
-                                  const Text(
-                                    "Budget",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: 'satoshi-regular',
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  children: [
+                                    const Text(
+                                      "Budget",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: 'satoshi-regular',
+                                      ),
                                     ),
-                                  ),
-                                  Container(
-                                    height: 5,
-                                  ),
-                                  const Text(
-                                    "\$1000.98",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'satoshi-bold',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 20,
+                                    Container(
+                                      height: 5,
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                width: 1,
-                                height: 50,
-                                color: Colors.white,
-                              ),
-                              Column(
-                                children: [
-                                  const Text(
-                                    "Spent",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: 'satoshi-regular',
+                                    Text(
+                                      "${user.currency} ${budget.budget.toStringAsFixed(1)}",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'satoshi-bold',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                      ),
                                     ),
-                                  ),
-                                  Container(
-                                    height: 5,
-                                  ),
-                                  const Text(
-                                    "\$500.98",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'satoshi-bold',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 20,
+                                  ],
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 50,
+                                  color: Colors.white,
+                                ),
+                                Column(
+                                  children: [
+                                    const Text(
+                                      "Spent",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: 'satoshi-regular',
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Container(
-                            height: 16,
-                          ),
-                          Container(
-                              padding: const EdgeInsets.only(top: 10),
-                              width: MediaQuery.of(context).size.width,
-                              alignment: Alignment.center,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Text(
-                                    "View insight",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'satoshi-regular',
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 12,
+                                    Container(
+                                      height: 5,
                                     ),
-                                  ),
-                                  Icon(
-                                    CupertinoIcons.chevron_right,
-                                    size: 12,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              )),
-                        ],
-                      ),
-                    ],
-                  )
-                ),
+                                    Text(
+                                      "${user.currency} ${total_spent.toStringAsFixed(1)}",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'satoshi-bold',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Container(
+                              height: 16,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                widget.insightCallback();
+                              },
+                              child: Container(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  width: MediaQuery.of(context).size.width,
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Text(
+                                        "View insight",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'satoshi-regular',
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Icon(
+                                        CupertinoIcons.chevron_right,
+                                        size: 12,
+                                        color: Colors.white,
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )),
                 Container(
                   height: 10,
                 ),
@@ -274,10 +321,10 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
                     child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: categoryList.length,
+                        itemCount: categories.length,
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context, index) {
-                          return CategoryAdapter(category: categoryList[index]);
+                          return CategoryAdapter(category: categories[index], callback: selectionCallback, catCallback: catCallback,);
                         }),
                   ),
                   Container(
@@ -316,34 +363,35 @@ class _HomePageState extends State<HomePage> {
                                     LegendOptions(showLegends: false),
                               ),
                               Container(
-                                width: MediaQuery.of(context).size.width / 2,
-                                height: 160,
-                                alignment: Alignment.center,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Budget",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'satoshi-medium',
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w400,
+                                  width: MediaQuery.of(context).size.width / 2,
+                                  height: 160,
+                                  alignment: Alignment.center,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Budget",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'satoshi-medium',
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      "#${formatMoney(total_spent)}",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'satoshi-bold',
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    )
-                                  ],
-                                ))
+                                      Text(
+                                        "#${formatMoney(budget.budget)}",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'satoshi-bold',
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )
+                                    ],
+                                  ))
                             ],
                           )),
                       Container(
@@ -389,10 +437,12 @@ class _HomePageState extends State<HomePage> {
                     height: 500,
                     child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: 12,
+                        itemCount: selectedCategory == null ? activities.length : catActivity.length,
                         scrollDirection: Axis.vertical,
                         itemBuilder: (context, index) {
-                          return ActivityAdapter();
+                          return ActivityAdapter(
+                            activity: selectedCategory == null ? activities[index] : catActivity[index],
+                          );
                         }),
                   ),
                 ]),
@@ -405,41 +455,77 @@ class _HomePageState extends State<HomePage> {
   Future<void> selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(), // Specify the initial date
-      firstDate: DateTime(2000), // Specify the first allowable date
-      lastDate: DateTime(2101), // Specify the last allowable date
+      initialDate: DateTime.fromMillisecondsSinceEpoch(budget.startDate),
+      firstDate: DateTime.fromMillisecondsSinceEpoch(budget.startDate),
+      lastDate: DateTime.fromMillisecondsSinceEpoch(budget.endDate),
       builder: (BuildContext context, Widget child) {
         return Theme(
-          data: ThemeData.light(), // Customize the date picker theme
+          data: ThemeData.light(),
           child: child,
         );
       },
     );
 
     if (picked != null && picked != selectedDate) {
-      // User has selected a date
       setState(() {
         selectedDate = picked;
+        formattedDate = DateFormat('MMM d').format(selectedDate);
       });
     }
   }
 
-
   Future<void> init() async {
-    categoryList.add(Category(emoji: "🛒", title: "Groceries"));
-    categoryList.add(Category(emoji: "🍛", title: "Food"));
-    categoryList.add(Category(emoji: "⚡️", title: "Electricity"));
-    categoryList.add(Category(emoji: "🌐", title: "Internet"));
-    categoryList.add(Category(emoji: "⛽️", title: "Fuel"));
-    categoryList.add(Category(emoji: "✈️️", title: "Transport"));
-    categoryList.add(Category(emoji: "🏠️", title: "Rent"));
-    categoryList.add(Category(emoji: "💰️", title: "Charity"));
+    setState((){
+      is_loading = true;
+    });
 
-    for (var i = 0; i < _dataList.length; i++) {
-      total_spent += _dataList[i].total_spent;
+    List<Budget> budgets = await db_helper.getBudgets();
+    for (var i = 0; i < budgets.length; i++) {
+      if (budgets[i].endDate > DateTime.now().millisecondsSinceEpoch) {
+        budget = budgets[i];
+      }
     }
 
-    setState(() {});
+    user = await db_helper.getUser();
+
+    remaining = budget.budget;
+    categories = await db_helper.getCategories();
+    for (var i = 0; i < categories.length; i++) {
+
+      colorList.add(myColorList[i]);
+
+      List<Activity> list = await db_helper.getActivityByCategory(categories[i].id);
+
+      double total = 0;
+      for (var j = 0; j < list.length; j++) {
+        total += list[j].amount;
+      }
+      total_spent += total;
+      dataMap[categories[i].title] = total;
+      _dataList.add(
+        PieDescItem(
+            id: i, color: myColorList[i], category: categories[i].title, total_spent: total)
+      );
+    }
+
+    remaining -= total_spent;
+    dataMap["Remainders"] = remaining;
+    colorList.add(myColorList[categories.length]);
+    _dataList.add(
+        PieDescItem(
+            id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: remaining)
+    );
+
+    print(colorList.length);
+
+    balance = budget.initialBalance;
+    balance = balance - total_spent;
+
+    activities = await db_helper.getActivity();
+
+    setState((){
+      is_loading = false;
+    });
 
   }
 
@@ -448,4 +534,5 @@ class _HomePageState extends State<HomePage> {
     init();
     super.initState();
   }
+
 }

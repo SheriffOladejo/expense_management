@@ -28,7 +28,7 @@ class _PieDescState extends State<PieDesc> {
             height: 8,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(8)),
-              color: HexColor(widget.item.color)
+              color: widget.item.color
             ),
           ),
           Container(width: 10,),

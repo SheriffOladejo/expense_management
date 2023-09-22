@@ -21,7 +21,7 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
 
   List<Widget> _buildScreens() {
     return [
-      HomePage(),
+      HomePage(insightCallback: insightCallback),
       Statistics(),
       SelectCategory(),
       Reports(),
@@ -62,6 +62,13 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
         navBarHeight: MediaQuery.of(context).viewInsets.bottom > 0 ? 0.0 : kBottomNavigationBarHeight,
       ),
     );
+  }
+
+  Future<void> insightCallback () {
+    _controller.jumpToTab(1);
+    setState(() {
+
+    });
   }
 
   Future<void> callback() async {

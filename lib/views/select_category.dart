@@ -19,6 +19,7 @@ class _SelectCategoryState extends State<SelectCategory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -29,51 +30,61 @@ class _SelectCategoryState extends State<SelectCategory> {
           fontWeight: FontWeight.w600,
         ),),
         centerTitle: true,
-        automaticallyImplyLeading: true,
-        leading: GestureDetector(
-          onTap: () {
-
-          },
-          child: Icon(CupertinoIcons.chevron_left, color: Colors.black,),
-        ),
+        automaticallyImplyLeading: false,
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-        color: Colors.white,
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AddCategory()));
-              },
-              child: Container(
-                height: 50,
-                width: MediaQuery.of(context).size.width,
-                alignment: Alignment.centerLeft,
-                child: Text("➕   Add category", style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'inter-regular',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),)
+      body: SingleChildScrollView(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+          color: Colors.white,
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddCategory(callback: callback, from: "select_category",)));
+                },
+                child: Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width,
+                  alignment: Alignment.centerLeft,
+                  child: Text("➕   Add category", style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'inter-regular',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),)
+                ),
               ),
-            ),
-            Container(
-              height: MediaQuery.of(context).size.height - 200,
-              child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: categoryList.length,
-                  scrollDirection: Axis.vertical,
-                  itemBuilder: (context, index) {
-                    return CategoryAdapter2(category: categoryList[index]);
-                  }),
-            ),
-          ],
+              Container(
+                height: MediaQuery.of(context).size.height - 200,
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: categoryList.length,
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (context, index) {
+                      return CategoryAdapter2(category: categoryList[index]);
+                    }),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> callback (String emoji, String title, double budget, int id) async {
+    var cat = Category(
+      emoji: emoji,
+      title: title,
+      budget: budget,
+      id: id,
+      spent: 0,
+    );
+    categoryList.add(cat);
+    setState(() {
+
+    });
   }
 
   Future<void> init () async {

@@ -2,10 +2,9 @@ class Activity {
 
   int id;
   int category_id;
-
   String title;
-  String amount;
-  String time;
+  double amount;
+  int time;
 
   Activity({
     this.id,

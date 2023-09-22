@@ -1,6 +1,8 @@
+import 'package:expense_management/utils/hex_color.dart';
+
 class PieDescItem {
   int id;
-  String color;
+  HexColor color;
   String category;
   double total_spent;
 

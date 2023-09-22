@@ -1,7 +1,13 @@
+import 'package:expense_management/models/activity.dart';
+import 'package:expense_management/models/budget.dart';
 import 'package:expense_management/models/category.dart';
+import 'package:expense_management/models/user.dart';
+import 'package:expense_management/utils/db_helper.dart';
 import 'package:expense_management/utils/hex_color.dart';
+import 'package:expense_management/views/expense_bottom_nav.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class EnterAmount extends StatefulWidget {
 
@@ -19,9 +25,19 @@ class _EnterAmountState extends State<EnterAmount> {
   final amountController = TextEditingController();
   final budgetController = TextEditingController();
 
+  var db_helper = DbHelper();
+  Budget budget;
+  double remaining;
+  User user;
+  bool isEditing = false;
+  bool isLoading = false;
+
+  final form = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -40,146 +56,182 @@ class _EnterAmountState extends State<EnterAmount> {
           child: Icon(CupertinoIcons.chevron_left, color: Colors.black,),
         ),
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        padding: const EdgeInsets.all(15),
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(height: 10,),
-            Text("What did you spend money on? Enter a name of the item and the amount spent on it", style: TextStyle(
-                fontFamily: 'satoshi-medium',
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Colors.grey
-            ),),
-            Container(height: 30,),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: Text("Budget", style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                fontFamily: 'satoshi-medium',
-              ),),
-            ),
-            Container(height: 5,),
-            Container(
-              height: 50,
-              child: TextFormField(
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'satoshi-medium',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                controller: budgetController,
-                textAlignVertical: TextAlignVertical.bottom,
-                decoration: InputDecoration(
-                  //contentPadding: EdgeInsets.all(15.0),
-                  hintText: '\#200.0',
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
+      body: Form(
+        key: form,
+        child: SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            padding: const EdgeInsets.all(15),
+            color: Colors.white,
+            child: isLoading ? Center(child: CircularProgressIndicator(),) : Column(
+              children: [
+                Container(height: 10,),
+                Text("What did you spend money on? Enter a name of the item and the amount spent on it\nBudget balance: ${user.currency} ${remaining.toStringAsFixed(1)}", style: TextStyle(
                     fontFamily: 'satoshi-medium',
-                    fontSize: 16,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey
+                ),),
+                Container(height: 30,),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Text("Budget", style: TextStyle(
+                    color: Colors.black,
                     fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    fontFamily: 'satoshi-medium',
+                  ),),
+                ),
+                Container(height: 5,),
+                Container(
+                  height: 50,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'satoshi-medium',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          controller: budgetController,
+                          validator: (value) {
+                            if (budgetController.text.isNotEmpty) {
+                              if (double.parse(budgetController.text) > remaining) {
+                                return "Cannot exceed overall budget";
+                              }
+                            }
+                            return null;
+                          },
+                          textAlignVertical: TextAlignVertical.center,
+                          readOnly: !isEditing,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                          ],
+                          decoration: InputDecoration(
+                            hintText: '${user.currency} ${widget.category.budget.toStringAsFixed(1)}',
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontFamily: 'satoshi-medium',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4.0),
+                              borderSide: BorderSide(color: HexColor("#D0D5DD")),
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Image.asset('assets/images/edit.png'), // Use the asset path
+                        onPressed: () {
+                          setState(() {
+                            isEditing = !isEditing;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                  suffix: GestureDetector(
-                    onTap: () {
-                      
+                ),
+                Container(height: 5,),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Text("Item", style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    fontFamily: 'satoshi-medium',
+                  ),),
+                ),
+                Container(height: 5,),
+                Container(
+                  height: 50,
+                  child: TextFormField(
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'satoshi-medium',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return "Required";
+                      }
+                      return null;
                     },
-                    child: IconButton(
-                      icon: Image.asset('assets/images/edit.png', width: 16, height: 16,), // Use the asset path
-                      onPressed: () {
-
-                      },
-                    )
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.0),
-                    borderSide: BorderSide(color: HexColor("#D0D5DD")),
+                    controller: itemController,
+                    textAlignVertical: TextAlignVertical.bottom,
+                    decoration: InputDecoration(
+                      //contentPadding: EdgeInsets.all(15.0),
+                      hintText: 'Ex. Sausages',
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                        fontFamily: 'satoshi-medium',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4.0),
+                        borderSide: BorderSide(color: HexColor("#D0D5DD")),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Container(height: 5,),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: Text("Item", style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                fontFamily: 'satoshi-medium',
-              ),),
-            ),
-            Container(height: 5,),
-            Container(
-              height: 50,
-              child: TextFormField(
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'satoshi-medium',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                controller: itemController,
-                textAlignVertical: TextAlignVertical.bottom,
-                decoration: InputDecoration(
-                  //contentPadding: EdgeInsets.all(15.0),
-                  hintText: 'Ex. Sausages',
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontFamily: 'satoshi-medium',
-                    fontSize: 16,
+                Container(height: 10,),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Text("Amount spent", style: TextStyle(
+                    color: Colors.black,
                     fontWeight: FontWeight.w500,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.0),
-                    borderSide: BorderSide(color: HexColor("#D0D5DD")),
-                  ),
-                ),
-              ),
-            ),
-            Container(height: 10,),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: Text("Amount spent", style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                fontFamily: 'satoshi-medium',
-              ),),
-            ),
-            Container(height: 5,),
-            Container(
-              height: 50,
-              child: TextFormField(
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'satoshi-medium',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                controller: amountController,
-                textAlignVertical: TextAlignVertical.bottom,
-                decoration: InputDecoration(
-                  //contentPadding: EdgeInsets.all(15.0),
-                  hintText: '\$0.0',
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontFamily: 'satoshi-medium',
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.0),
-                    borderSide: BorderSide(color: HexColor("#D0D5DD")),
+                    fontFamily: 'satoshi-medium',
+                  ),),
+                ),
+                Container(height: 5,),
+                Container(
+                  height: 50,
+                  child: TextFormField(
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'satoshi-medium',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    ],
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return "Required";
+                      }
+                      return null;
+                    },
+                    textAlignVertical: TextAlignVertical.bottom,
+                    decoration: InputDecoration(
+                      //contentPadding: EdgeInsets.all(15.0),
+                      hintText: '${user.currency} 0.0',
+                      hintStyle: TextStyle(
+                        color: Colors.grey,
+                        fontFamily: 'satoshi-medium',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4.0),
+                        borderSide: BorderSide(color: HexColor("#D0D5DD")),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       bottomSheet: Container(
@@ -193,8 +245,19 @@ class _EnterAmountState extends State<EnterAmount> {
             minWidth: MediaQuery.of(context).size.width,
             height: 45,
             color: HexColor("#206CDF"),
-            onPressed: () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
+            onPressed: () async {
+              if (form.currentState.validate()) {
+                await saveActivity();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      // This is the screen you want to navigate to after popping all screens
+                      return ExpenseBottomNav();
+                    },
+                  ),
+                      (Route<dynamic> route) => false, // Pop all routes on the stack
+                );
+              }
             },
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(3))),
@@ -223,6 +286,44 @@ class _EnterAmountState extends State<EnterAmount> {
         ),
       ),
     );
+  }
+
+  Future<void> saveActivity () async {
+    var act = Activity(
+      id: DateTime.now().millisecondsSinceEpoch,
+      amount: double.parse(amountController.text),
+      category_id: widget.category.id,
+      title: itemController.text,
+      time: DateTime.now().millisecondsSinceEpoch
+    );
+    await db_helper.saveActivity(act);
+  }
+
+  void init () async {
+    setState(() {
+      isLoading = true;
+    });
+    user = await db_helper.getUser();
+    List<Budget> budgets = await db_helper.getBudgets();
+    for (var i = 0; i < budgets.length; i++) {
+      if (budgets[i].endDate > DateTime.now().millisecondsSinceEpoch) {
+        budget = budgets[i];
+      }
+    }
+    List<Category> categories = await db_helper.getCategories();
+    remaining = budget.budget;
+    for (var i = 0; i < categories.length; i++) {
+      remaining -= categories[i].budget;
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState () {
+    init();
+    super.initState();
   }
 
 }

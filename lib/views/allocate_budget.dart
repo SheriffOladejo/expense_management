@@ -35,6 +35,8 @@ class _AllocateBudgetState extends State<AllocateBudget> {
 
   String currency = "";
 
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,12 +57,12 @@ class _AllocateBudgetState extends State<AllocateBudget> {
         height: MediaQuery.of(context).size.height,
         padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
         color: Colors.white,
-        child: SingleChildScrollView(
+        child: isLoading ? Center(child: CircularProgressIndicator(),) : SingleChildScrollView(
           child: Column(
             children: [
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddCategory(callback: callback,)));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddCategory(callback: callback, from: "allocate_budget",)));
                 },
                 child: Container(
                   height: 50,
@@ -173,8 +175,6 @@ class _AllocateBudgetState extends State<AllocateBudget> {
       showToast("Budgets should be assigned");
     }
     else {
-      print(widget.budget);
-      print(total_budget);
       if (total_budget > widget.budget) {
         showToast("Budget is greater than total budget assigned");
       }
@@ -196,10 +196,12 @@ class _AllocateBudgetState extends State<AllocateBudget> {
   }
 
   Future<void> init () async {
+    setState((){
+      isLoading = true;
+    });
     categoryList = await getCategories();
     user = await db_helper.getUser();
     currency = user.currency;
-    print(widget.budget);
     for (var i = 0; i < categoryList.length; i++) {
       adapterList.add(AllocateAdapter(
         category: categoryList[i],
@@ -210,7 +212,7 @@ class _AllocateBudgetState extends State<AllocateBudget> {
     }
 
     setState(() {
-
+      isLoading = false;
     });
   }
 

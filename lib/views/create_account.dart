@@ -397,14 +397,14 @@ class _CreateAccountState extends State<CreateAccount> {
 
     databaseReference.set(data).then((_) async {
 
-      await db_helper.saveCategory(Category(id: 0, emoji: "🛒", title: "Groceries", budget: 0, spent: 0));
-      await db_helper.saveCategory(Category(id: 1, emoji: "🍛", title: "Food", budget: 0, spent: 0));
-      await db_helper.saveCategory(Category(id: 2, emoji: "⚡️", title: "Electricity", budget: 0, spent: 0));
-      await db_helper.saveCategory(Category(id: 3, emoji: "🌐", title: "Internet", budget: 0, spent: 0));
-      await db_helper.saveCategory(Category(id: 4, emoji: "⛽️", title: "Fuel", budget: 0, spent: 0));
-      await db_helper.saveCategory(Category(id: 5, emoji: "✈️️", title: "Transport", budget: 0, spent: 0));
-      await db_helper.saveCategory(Category(id: 6, emoji: "🏠️", title: "Rent", budget: 0, spent: 0));
-      await db_helper.saveCategory(Category(id: 7, emoji: "💰️", title: "Charity", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012926, emoji: "🛒", title: "Groceries", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012925, emoji: "🍛", title: "Food", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012924, emoji: "⚡️", title: "Electricity", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012923, emoji: "🌐", title: "Internet", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012922, emoji: "⛽️", title: "Fuel", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012921, emoji: "✈️️", title: "Transport", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012920, emoji: "🏠️", title: "Rent", budget: 0, spent: 0));
+      await db_helper.saveCategory(Category(id: 1695394012919, emoji: "💰️", title: "Charity", budget: 0, spent: 0));
 
       setState(() {
         isLoading = false;

@@ -358,6 +358,7 @@ class _LoginState extends State<Login> {
         double totalBudget = 0;
         for (var i = 0; i < list.length; i++) {
           totalBudget += list[i].budget;
+          await dbHelper.saveCategory(list[i]);
         }
         if (totalBudget == 0) {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AllocateBudget(budget: budget.budget,)));
@@ -371,6 +372,10 @@ class _LoginState extends State<Login> {
 
     if (!accountFound) {
       showToast("Account not found");
+    }
+    else {
+      await dbHelper.getActivityFB();
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ExpenseBottomNav()));
     }
 
     setState(() {

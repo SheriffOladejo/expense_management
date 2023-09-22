@@ -50,7 +50,6 @@ class _WalletSplashState extends State<WalletSplash> {
   }
 
   Future<void> init () async {
-    await Future.delayed(Duration(seconds: 3));
     String expenseApproved = await checkExpenseAppStoreApproval();
     String walletApproved = await checkWalletAppStoreApproval();
     if (expenseApproved == "yes" && walletApproved == "yes") {
@@ -81,7 +80,6 @@ class _WalletSplashState extends State<WalletSplash> {
             budget = list[i];
           }
         }
-
         if (user.currency == '' || user.currency == 'null') {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SelectCurrency()));
         }
@@ -96,6 +94,9 @@ class _WalletSplashState extends State<WalletSplash> {
           }
           if (totalBudget == 0) {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AllocateBudget(budget: budget.budget,)));
+          }
+          else {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ExpenseBottomNav()));
           }
         }
         else {

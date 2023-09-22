@@ -1,3 +1,4 @@
+import 'package:expense_management/models/activity.dart';
 import 'package:expense_management/models/budget.dart';
 import 'package:expense_management/models/category.dart';
 import 'package:expense_management/models/user.dart';
@@ -73,7 +74,21 @@ class DbHelper {
   String col_cat_budget = "budget";
   String col_cat_spent = "spent";
 
+  String activity_table = "activity_table";
+  String col_activity_id = "id";
+  String col_activity_cat_id = "cat_id";
+  String col_activity_amount = "spent";
+  String col_activity_title = "title";
+  String col_activity_time = "time";
+
   Future createDb(Database db, int version) async {
+
+    String create_activity_table = "create table $activity_table ("
+        "$col_activity_id integer primary key autoincrement,"
+        "$col_activity_cat_id integer,"
+        "$col_activity_amount double,"
+        "$col_activity_title text,"
+        "$col_activity_time integer)";
 
     String create_budget_table = "create table $budget_table ("
         "$col_budget_id integer,"
@@ -136,7 +151,7 @@ class DbHelper {
     await db.execute(create_wallet_table);
     await db.execute(create_candle_table);
     await db.execute(create_user_table);
-
+    await db.execute(create_activity_table);
 
   }
 
@@ -158,6 +173,68 @@ class DbHelper {
     final db_path = await getDatabasesPath();
     final path = join(db_path, db_name);
     return await openDatabase(path, version: 1, onCreate: createDb);
+  }
+
+  Future<void> saveActivity (Activity activity) async {
+    Database db = await database;
+    String query = "insert into $activity_table ($col_activity_cat_id, $col_activity_amount, $col_activity_title, "
+        "$col_activity_time) values (${activity.category_id}, ${activity.amount}, '${activity.title}', ${activity.time})";
+    final params = {
+      "id": activity.id.toString(),
+      "category_id": activity.category_id.toString(),
+      "amount": activity.amount.toStringAsFixed(1),
+      "title": activity.title,
+      "time": activity.time.toString(),
+    };
+    User user = await getUser();
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/activity/${activity.id.toString()}');
+    try {
+      await db.execute(query);
+      await databaseReference.set(params);
+      return true;
+    }
+    catch(e) {
+      showToast("Activity not saved");
+      return false;
+    }
+  }
+
+  Future<List<Activity>> getActivity () async {
+    List<Activity> list = [];
+    Database db = await database;
+    String query = "select * from $activity_table";
+    List<Map<String, Object>> result = await db.rawQuery(query);
+    for (var i = 0; i < result.length; i++) {
+      list.add(
+        Activity(
+          id: result[i][col_activity_id],
+          time: result[i][col_activity_time],
+          title: result[i][col_activity_title],
+          amount: result[i][col_activity_amount],
+          category_id: result[i][col_activity_cat_id],
+        )
+      );
+    }
+    return list;
+  }
+
+  Future<List<Activity>> getActivityByCategory (int cat_id) async {
+    List<Activity> list = [];
+    Database db = await database;
+    String query = "select * from $activity_table where $col_activity_cat_id = $cat_id";
+    List<Map<String, Object>> result = await db.rawQuery(query);
+    for (var i = 0; i < result.length; i++) {
+      list.add(
+          Activity(
+            id: result[i][col_activity_id],
+            time: result[i][col_activity_time],
+            title: result[i][col_activity_title],
+            amount: result[i][col_activity_amount],
+            category_id: result[i][col_activity_cat_id],
+          )
+      );
+    }
+    return list;
   }
 
   Future<void> saveCategory (Category cat) async {
@@ -184,21 +261,57 @@ class DbHelper {
     }
   }
 
-  Future<List<Category>> getCategoriesFB () async {
+  Future<void> getActivityFB () async {
+    var user = await getUser();
+    DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/activity');
+    DataSnapshot snapshot = await databaseReference.get();
+
+    if (snapshot.value != null) {
+      Map<dynamic, dynamic> data = snapshot.value;
+
+      data.forEach((key, categoryData) async {
+        if (categoryData is Map) {
+          double amount = double.parse(categoryData['amount']);
+          int cat_id = int.parse(categoryData['category_id']);
+          int id = int.parse(categoryData['id']);
+          String title = categoryData['title'];
+          int time = int.parse(categoryData['time']);
+
+          await saveActivity(Activity(
+            id: id,
+            amount: amount,
+            category_id: cat_id,
+            title: title,
+            time: time,
+          ));
+
+        } else {
+          print("Invalid data format");
+        }
+      });
+    } else {
+      print("No data available");
+    }
+  }
+
+  Future<List<Category>> getCategoriesFB() async {
     List<Category> list = [];
     var user = await getUser();
     DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/categories');
     DataSnapshot snapshot = await databaseReference.get();
-    Map<dynamic, dynamic> values = snapshot.value;
+    print(snapshot.value);
 
-    if (values != null) {
-      values.forEach((key, value) async {
-        if (value is Map && value.containsKey('budget')) {
-          double budget = double.parse(value['budget']);
-          double spent = double.parse(value['spent']);
-          int id = int.parse(value['id']);
-          String title = value['title'];
-          String emoji = value['emoji'];
+    if (snapshot.value != null) {
+      Map<dynamic, dynamic> data = snapshot.value;
+
+      data.forEach((key, categoryData) {
+        if (categoryData is Map) {
+          double budget = double.parse(categoryData['budget']);
+          double spent = double.parse(categoryData['spent']);
+          int id = int.parse(categoryData['id']);
+          String title = categoryData['title'];
+          String emoji = categoryData['emoji'];
+          print(budget);
 
           list.add(
             Category(
@@ -207,14 +320,34 @@ class DbHelper {
               id: id,
               title: title,
               emoji: emoji,
-            )
+            ),
           );
+        } else {
+          print("Invalid data format");
         }
       });
+    } else {
+      print("No data available");
     }
 
     return list;
+  }
 
+  Future<Category> getCategoryById (int id) async {
+    Category cat;
+    Database db = await database;
+    String query = "select * from $category_table where $col_cat_id = $id";
+    List<Map<String, Object>> result = await db.rawQuery(query);
+    for (var i = 0; i < result.length; i++) {
+      cat = Category(
+        id: result[i][col_cat_id],
+        emoji: result[i][col_cat_emoji],
+        budget: result[i][col_cat_budget],
+        title: result[i][col_cat_title],
+        spent: result[i][col_cat_spent],
+      );
+    }
+    return cat;
   }
 
   Future<List<Category>> getCategories () async {
@@ -222,7 +355,6 @@ class DbHelper {
     Database db = await database;
     String query = "select * from $category_table";
     List<Map<String, Object>> result = await db.rawQuery(query);
-    print(result.length);
     for (var i = 0; i < result.length; i++) {
       list.add(
         Category(

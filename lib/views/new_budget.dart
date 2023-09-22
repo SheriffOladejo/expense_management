@@ -31,6 +31,8 @@ class _NewBudgetState extends State<NewBudget> {
 
   final form = GlobalKey<FormState>();
 
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +56,7 @@ class _NewBudgetState extends State<NewBudget> {
           height: MediaQuery.of(context).size.height,
           color: Colors.white,
           padding: const EdgeInsets.all(15),
-          child: Column(
+          child: isLoading ? Center(child: CircularProgressIndicator(),) : Column(
             children: [
               Container(height: 10,),
               Container(
@@ -260,7 +262,13 @@ class _NewBudgetState extends State<NewBudget> {
                   color: HexColor("#206CDF"),
                   onPressed: () async {
                     if (form.currentState.validate()) {
+                      setState(() {
+                        isLoading = true;
+                      });
                       await saveBudget();
+                      setState(() {
+                        isLoading = false;
+                      });
                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AllocateBudget(budget: double.parse(budgetController.text),)));
                     }
                   },
