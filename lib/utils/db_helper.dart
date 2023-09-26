@@ -202,7 +202,7 @@ class DbHelper {
   Future<List<Activity>> getActivity () async {
     List<Activity> list = [];
     Database db = await database;
-    String query = "select * from $activity_table";
+    String query = "select * from $activity_table order by $col_activity_time desc";
     List<Map<String, Object>> result = await db.rawQuery(query);
     for (var i = 0; i < result.length; i++) {
       list.add(
@@ -221,7 +221,7 @@ class DbHelper {
   Future<List<Activity>> getActivityByCategory (int cat_id) async {
     List<Activity> list = [];
     Database db = await database;
-    String query = "select * from $activity_table where $col_activity_cat_id = $cat_id";
+    String query = "select * from $activity_table where $col_activity_cat_id = $cat_id order by $col_activity_time desc";
     List<Map<String, Object>> result = await db.rawQuery(query);
     for (var i = 0; i < result.length; i++) {
       list.add(
@@ -299,7 +299,6 @@ class DbHelper {
     var user = await getUser();
     DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/categories');
     DataSnapshot snapshot = await databaseReference.get();
-    print(snapshot.value);
 
     if (snapshot.value != null) {
       Map<dynamic, dynamic> data = snapshot.value;
@@ -311,7 +310,6 @@ class DbHelper {
           int id = int.parse(categoryData['id']);
           String title = categoryData['title'];
           String emoji = categoryData['emoji'];
-          print(budget);
 
           list.add(
             Category(
@@ -386,7 +384,7 @@ class DbHelper {
       return true;
     }
     catch(e) {
-      showToast("Budget not saved");
+      showToast("Category not saved");
       return false;
     }
   }

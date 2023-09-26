@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 class CategoryAdapter2 extends StatefulWidget {
 
   Category category;
+  BuildContext context;
+  Function callback;
   CategoryAdapter2({
     this.category,
+    this.callback,
+    this.context,
   });
 
   @override
@@ -19,8 +23,9 @@ class _CategoryAdapter2State extends State<CategoryAdapter2> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => EnterAmount(category: widget.category,)));
+      onTap: () async {
+        await Navigator.push(widget.context, MaterialPageRoute(builder: (context) => EnterAmount(category: widget.category,)));
+        await widget.callback();
       },
       child: Container(
         decoration: BoxDecoration(

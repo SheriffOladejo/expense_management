@@ -1,12 +1,16 @@
 import 'package:expense_management/models/pie_desc_item.dart';
+import 'package:expense_management/models/user.dart';
 import 'package:expense_management/utils/hex_color.dart';
+import 'package:expense_management/utils/methods.dart';
 import 'package:flutter/material.dart';
 
 class PieDesc extends StatefulWidget {
 
   PieDescItem item;
+  User user;
   PieDesc({
-    this.item
+    this.item,
+    this.user,
   });
 
   @override
@@ -39,7 +43,7 @@ class _PieDescState extends State<PieDesc> {
             fontFamily: 'satoshi-regular',
           ),),
           Spacer(),
-          Text('#${widget.item.total_spent.toStringAsFixed(1)}', style: TextStyle(
+          Text('${formatMoney(widget.item.total_spent)}', style: TextStyle(
             color: HexColor("#667085"),
             fontWeight: FontWeight.w400,
             fontSize: 14,
@@ -50,5 +54,7 @@ class _PieDescState extends State<PieDesc> {
       ),
     );
   }
+
+
 
 }

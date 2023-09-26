@@ -1,6 +1,7 @@
 import 'package:expense_management/models/activity.dart';
 import 'package:expense_management/models/category.dart';
 import 'package:expense_management/utils/db_helper.dart';
+import 'package:expense_management/utils/methods.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -62,10 +63,10 @@ class _ActivityAdapterState extends State<ActivityAdapter> {
             height: 50,
             width: 100,
             alignment: Alignment.centerRight,
-            child: Text("-${user.currency} ${widget.activity.amount.toStringAsFixed(1)}", style: TextStyle(
+            child: Text("-${user.currency} ${formatMoney(widget.activity.amount)}", style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w400,
-                fontSize: 16,
+                fontSize: 13,
                 fontFamily: 'satoshi-medium'
             ),),
           ),

@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 class EnterAmount extends StatefulWidget {
 
   Category category;
+
   EnterAmount({this.category});
 
   @override
@@ -21,12 +22,14 @@ class EnterAmount extends StatefulWidget {
 
 class _EnterAmountState extends State<EnterAmount> {
 
-  final itemController = TextEditingController();
-  final amountController = TextEditingController();
+  final itemController = TextEditingController(text: "test");
+  final amountController = TextEditingController(text: "3");
   final budgetController = TextEditingController();
 
   var db_helper = DbHelper();
   Budget budget;
+  double balance;
+  double total_spent = 0;
   double remaining;
   User user;
   bool isEditing = false;
@@ -67,7 +70,7 @@ class _EnterAmountState extends State<EnterAmount> {
             child: isLoading ? Center(child: CircularProgressIndicator(),) : Column(
               children: [
                 Container(height: 10,),
-                Text("What did you spend money on? Enter a name of the item and the amount spent on it\nBudget balance: ${user.currency} ${remaining.toStringAsFixed(1)}", style: TextStyle(
+                Text("What did you spend money on? Enter a name of the item and the amount spent on it\n${isEditing ? "Budget balance: ${user.currency} ${remaining.toStringAsFixed(1)}" : ""}", style: TextStyle(
                     fontFamily: 'satoshi-medium',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -248,15 +251,7 @@ class _EnterAmountState extends State<EnterAmount> {
             onPressed: () async {
               if (form.currentState.validate()) {
                 await saveActivity();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      // This is the screen you want to navigate to after popping all screens
-                      return ExpenseBottomNav();
-                    },
-                  ),
-                      (Route<dynamic> route) => false, // Pop all routes on the stack
-                );
+                Navigator.pop(context);
               }
             },
             shape: const RoundedRectangleBorder(
@@ -289,6 +284,13 @@ class _EnterAmountState extends State<EnterAmount> {
   }
 
   Future<void> saveActivity () async {
+    setState(() {
+      isLoading = true;
+    });
+    if (isEditing && double.parse(budgetController.text) != widget.category.budget) {
+      widget.category.budget = double.parse(budgetController.text);
+      await db_helper.updateCategory(widget.category);
+    }
     var act = Activity(
       id: DateTime.now().millisecondsSinceEpoch,
       amount: double.parse(amountController.text),
@@ -297,6 +299,9 @@ class _EnterAmountState extends State<EnterAmount> {
       time: DateTime.now().millisecondsSinceEpoch
     );
     await db_helper.saveActivity(act);
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void init () async {
@@ -315,6 +320,8 @@ class _EnterAmountState extends State<EnterAmount> {
     for (var i = 0; i < categories.length; i++) {
       remaining -= categories[i].budget;
     }
+    balance = budget.initialBalance;
+    balance = balance - total_spent;
     setState(() {
       isLoading = false;
     });

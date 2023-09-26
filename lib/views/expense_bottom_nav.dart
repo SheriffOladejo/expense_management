@@ -77,6 +77,7 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
     });
   }
 
+
   Future<void> init () async {
     _controller = PersistentTabController(initialIndex: 0);
     setState(() {
@@ -100,7 +101,7 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
           color: Colors.white,
         ),
         icon: ImageIcon(
-          AssetImage("assets/images/wallet.png"),
+          AssetImage("assets/images/home.png"),
         ),
         activeColorPrimary: HexColor("#194D9B"),
         inactiveColorPrimary: HexColor("#AAAAAA"),
@@ -113,7 +114,7 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
           color: Colors.white,
         ),
         icon: ImageIcon(
-          AssetImage("assets/images/market.png"),
+          AssetImage("assets/images/stats.png"),
         ),
         activeColorPrimary: HexColor("#194D9B"),
         inactiveColorPrimary: HexColor("#AAAAAA"),
@@ -137,7 +138,7 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
           color: Colors.white,
         ),
         icon: ImageIcon(
-          AssetImage("assets/images/explore.png"),
+          AssetImage("assets/images/reports.png"),
         ),
         activeColorPrimary: HexColor("#194D9B"),
         inactiveColorPrimary: HexColor("#AAAAAA"),
@@ -150,7 +151,7 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
           color: Colors.white,
         ),
         icon: ImageIcon(
-          AssetImage("assets/images/settings.png"),
+          AssetImage("assets/images/sets.png"),
         ),
         activeColorPrimary: HexColor("#194D9B"),
         inactiveColorPrimary: HexColor("#AAAAAA"),

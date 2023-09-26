@@ -3,7 +3,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class _BarChart extends StatelessWidget {
-  const _BarChart();
+
+  List<BarChartGroupData> barGroups;
+  double chartHighestSpent;
+
+   _BarChart({this.barGroups, this.chartHighestSpent});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +18,7 @@ class _BarChart extends StatelessWidget {
         borderData: borderData,
         barGroups: barGroups,
         gridData: FlGridData(show: true),
-        maxY: 1300000, // change to max amount spent in duration + 10%
+        maxY: (chartHighestSpent + (0.2 * chartHighestSpent)), // change to max amount spent in duration + 20%
       ),
     );
   }
@@ -158,81 +162,88 @@ class _BarChart extends StatelessWidget {
     end: Alignment.topCenter,
   );
 
-  List<BarChartGroupData> get barGroups => [
-    BarChartGroupData(
-      x: 0,
-      barRods: [
-        BarChartRodData(
-          toY: 103430,
-          gradient: _barsGradient,
-        )
-      ],
-      showingTooltipIndicators: [0],
-    ),
-    BarChartGroupData(
-      x: 1,
-      barRods: [
-        BarChartRodData(
-          toY:450323.6,
-          gradient: _barsGradient,
-        )
-      ],
-      showingTooltipIndicators: [0],
-    ),
-    BarChartGroupData(
-      x: 2,
-      barRods: [
-        BarChartRodData(
-          toY: 214530,
-          gradient: _barsGradient,
-        )
-      ],
-      showingTooltipIndicators: [0],
-    ),
-    BarChartGroupData(
-      x: 3,
-      barRods: [
-        BarChartRodData(
-          toY: 504540,
-          gradient: _barsGradient,
-        )
-      ],
-      showingTooltipIndicators: [0],
-    ),
-    BarChartGroupData(
-      x: 4,
-      barRods: [
-        BarChartRodData(
-          toY: 802320,
-          gradient: _barsGradient,
-        )
-      ],
-      showingTooltipIndicators: [0],
-    ),
-    BarChartGroupData(
-      x: 5,
-      barRods: [
-        BarChartRodData(
-          toY: 1201210,
-          gradient: _barsGradient,
-        )
-      ],
-      showingTooltipIndicators: [0],
-    ),
-    BarChartGroupData(
-      x: 6,
-      barRods: [
-        BarChartRodData(
-          toY: 550343,
-          gradient: _barsGradient,
-        )
-      ],
-      showingTooltipIndicators: [0],
-    ),
-  ];
+  // List<BarChartGroupData> get barGroups => [
+  //   BarChartGroupData(
+  //     x: 0,
+  //     barRods: [
+  //       BarChartRodData(
+  //         toY: 103430,
+  //         gradient: _barsGradient,
+  //       )
+  //     ],
+  //     showingTooltipIndicators: [0],
+  //   ),
+  //   BarChartGroupData(
+  //     x: 1,
+  //     barRods: [
+  //       BarChartRodData(
+  //         toY:450323.6,
+  //         gradient: _barsGradient,
+  //       )
+  //     ],
+  //     showingTooltipIndicators: [0],
+  //   ),
+  //   BarChartGroupData(
+  //     x: 2,
+  //     barRods: [
+  //       BarChartRodData(
+  //         toY: 214530,
+  //         gradient: _barsGradient,
+  //       )
+  //     ],
+  //     showingTooltipIndicators: [0],
+  //   ),
+  //   BarChartGroupData(
+  //     x: 3,
+  //     barRods: [
+  //       BarChartRodData(
+  //         toY: 504540,
+  //         gradient: _barsGradient,
+  //       )
+  //     ],
+  //     showingTooltipIndicators: [0],
+  //   ),
+  //   BarChartGroupData(
+  //     x: 4,
+  //     barRods: [
+  //       BarChartRodData(
+  //         toY: 802320,
+  //         gradient: _barsGradient,
+  //       )
+  //     ],
+  //     showingTooltipIndicators: [0],
+  //   ),
+  //   BarChartGroupData(
+  //     x: 5,
+  //     barRods: [
+  //       BarChartRodData(
+  //         toY: 1201210,
+  //         gradient: _barsGradient,
+  //       )
+  //     ],
+  //     showingTooltipIndicators: [0],
+  //   ),
+  //   BarChartGroupData(
+  //     x: 6,
+  //     barRods: [
+  //       BarChartRodData(
+  //         toY: 550343,
+  //         gradient: _barsGradient,
+  //       )
+  //     ],
+  //     showingTooltipIndicators: [0],
+  //   ),
+  // ];
+
 }
 
 class BarChartSample3 extends StatefulWidget {
+
+  double chartHighestSpent;
+  List<BarChartGroupData> list;
+
+
+  BarChartSample3({this.list, this.chartHighestSpent});
 
   @override
   State<StatefulWidget> createState() => BarChartSample3State();
@@ -241,9 +252,9 @@ class BarChartSample3 extends StatefulWidget {
 class BarChartSample3State extends State<BarChartSample3> {
   @override
   Widget build(BuildContext context) {
-    return const AspectRatio(
+    return AspectRatio(
       aspectRatio: 1.6,
-      child: _BarChart(),
+      child: _BarChart(chartHighestSpent: widget.chartHighestSpent, barGroups: widget.list,),
     );
   }
 }

@@ -63,7 +63,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                     itemCount: categoryList.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (context, index) {
-                      return CategoryAdapter2(category: categoryList[index]);
+                      return CategoryAdapter2(category: categoryList[index], callback: destroyCallback, context: context,);
                     }),
               ),
             ],
@@ -71,6 +71,10 @@ class _SelectCategoryState extends State<SelectCategory> {
         ),
       ),
     );
+  }
+
+  Future<void> destroyCallback () {
+    //Navigator.pop(context);
   }
 
   Future<void> callback (String emoji, String title, double budget, int id) async {

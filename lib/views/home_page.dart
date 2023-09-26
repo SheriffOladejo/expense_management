@@ -50,6 +50,8 @@ class _HomePageState extends State<HomePage> {
 
   final List<PieDescItem> _dataList = [];
 
+  Color spentColor = Colors.white;
+
   final myColorList = [
     HexColor("#7F56D9"),
     HexColor("#9AE419"),
@@ -73,7 +75,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> catCallback (Category cat) {
     selectedCategory = cat;
-    filterActivities();
+    if (selectedCategory != null) {
+      filterActivities();
+    }
     setState(() {
 
     });
@@ -86,7 +90,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> filterActivities () {
     catActivity.clear();
     for (var i = 0; i < activities.length; i++) {
-      if (activities[i].id == selectedCategory.id) {
+      if (activities[i].category_id == selectedCategory.id) {
         catActivity.add(activities[i]);
       }
     }
@@ -106,8 +110,8 @@ class _HomePageState extends State<HomePage> {
           title: const Text("Welcome back!",
               style: TextStyle(
                 color: Colors.black,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'satoshi-regular',
+                fontWeight: FontWeight.w600,
+                fontFamily: 'satoshi-bold',
                 fontSize: 16,
               )),
         ),
@@ -115,7 +119,7 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: is_loading ? Center(child: CircularProgressIndicator(),) : CustomScrollView(
+          child: is_loading ? const Center(child: CircularProgressIndicator(),) : CustomScrollView(
             slivers: [
               SliverList(
                   delegate: SliverChildListDelegate([
@@ -124,6 +128,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(15),
                     width: MediaQuery.of(context).size.width,
                     height: 200,
+                    alignment: Alignment.center,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(16)),
                       image: DecorationImage(
@@ -163,7 +168,7 @@ class _HomePageState extends State<HomePage> {
                                       children: [
                                         Text(
                                           "$formattedDate",
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 13,
                                             fontWeight: FontWeight.w400,
@@ -173,7 +178,7 @@ class _HomePageState extends State<HomePage> {
                                         Container(
                                           width: 5,
                                         ),
-                                        Icon(
+                                        const Icon(
                                           CupertinoIcons.chevron_down,
                                           size: 12,
                                           color: Colors.white,
@@ -188,8 +193,8 @@ class _HomePageState extends State<HomePage> {
                               width: MediaQuery.of(context).size.width,
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                "${user.currency} ${balance.toStringAsFixed(1)}",
-                                style: TextStyle(
+                                "${user.currency} ${formatMoney(balance)}",
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'satoshi-bold',
                                   fontWeight: FontWeight.w600,
@@ -215,8 +220,8 @@ class _HomePageState extends State<HomePage> {
                                       height: 5,
                                     ),
                                     Text(
-                                      "${user.currency} ${budget.budget.toStringAsFixed(1)}",
-                                      style: TextStyle(
+                                      "${user.currency} ${formatMoney(budget.budget)}",
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'satoshi-bold',
                                         fontWeight: FontWeight.w600,
@@ -245,9 +250,9 @@ class _HomePageState extends State<HomePage> {
                                       height: 5,
                                     ),
                                     Text(
-                                      "${user.currency} ${total_spent.toStringAsFixed(1)}",
+                                      "${user.currency} ${formatMoney(total_spent)}",
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: spentColor,
                                         fontFamily: 'satoshi-bold',
                                         fontWeight: FontWeight.w600,
                                         fontSize: 20,
@@ -260,35 +265,6 @@ class _HomePageState extends State<HomePage> {
                             Container(
                               height: 16,
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                widget.insightCallback();
-                              },
-                              child: Container(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  width: MediaQuery.of(context).size.width,
-                                  alignment: Alignment.center,
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      Text(
-                                        "View insight",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontFamily: 'satoshi-regular',
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      Icon(
-                                        CupertinoIcons.chevron_right,
-                                        size: 12,
-                                        color: Colors.white,
-                                      ),
-                                    ],
-                                  )),
-                            ),
                           ],
                         ),
                       ],
@@ -300,7 +276,7 @@ class _HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.only(left: 15),
                   width: MediaQuery.of(context).size.width,
                   alignment: Alignment.centerLeft,
-                  child: Text(
+                  child: const Text(
                     "Categories",
                     style: TextStyle(
                         color: Colors.black,
@@ -352,7 +328,7 @@ class _HomePageState extends State<HomePage> {
                                 chartType: ChartType.ring,
                                 chartRadius:
                                     MediaQuery.of(context).size.width / 3.2,
-                                chartValuesOptions: ChartValuesOptions(
+                                chartValuesOptions: const ChartValuesOptions(
                                   showChartValueBackground: false,
                                   showChartValues: false,
                                   showChartValuesInPercentage: false,
@@ -360,7 +336,7 @@ class _HomePageState extends State<HomePage> {
                                   decimalPlaces: 1,
                                 ),
                                 legendOptions:
-                                    LegendOptions(showLegends: false),
+                                    const LegendOptions(showLegends: false),
                               ),
                               Container(
                                   width: MediaQuery.of(context).size.width / 2,
@@ -372,7 +348,7 @@ class _HomePageState extends State<HomePage> {
                                         CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(
+                                      const Text(
                                         "Budget",
                                         style: TextStyle(
                                           color: Colors.black,
@@ -381,15 +357,30 @@ class _HomePageState extends State<HomePage> {
                                           fontWeight: FontWeight.w400,
                                         ),
                                       ),
-                                      Text(
-                                        "#${formatMoney(budget.budget)}",
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: 'satoshi-bold',
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
+                                      RichText(
+                                        text: TextSpan(
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: user.currency,
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontFamily: 'satoshi-medium',
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: formatMoney(budget.budget),
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontFamily: 'satoshi-bold',
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      )
+                                      ),
                                     ],
                                   ))
                             ],
@@ -405,6 +396,7 @@ class _HomePageState extends State<HomePage> {
                             itemBuilder: (context, index) {
                               return PieDesc(
                                 item: _dataList[index],
+                                user: user,
                               );
                             }),
                       )
@@ -417,7 +409,7 @@ class _HomePageState extends State<HomePage> {
                     margin: const EdgeInsets.only(left: 15),
                     width: MediaQuery.of(context).size.width,
                     alignment: Alignment.centerLeft,
-                    child: Text(
+                    child: const Text(
                       "Activities",
                       style: TextStyle(
                           color: Colors.black,
@@ -509,17 +501,26 @@ class _HomePageState extends State<HomePage> {
     }
 
     remaining -= total_spent;
-    dataMap["Remainders"] = remaining;
-    colorList.add(myColorList[categories.length]);
-    _dataList.add(
-        PieDescItem(
-            id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: remaining)
-    );
-
-    print(colorList.length);
+    if (remaining > 0) {
+      dataMap["Remainder"] = remaining;
+      colorList.add(myColorList[categories.length]);
+      _dataList.add(
+          PieDescItem(
+              id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: remaining)
+      );
+    }
+    else if (remaining <= 0) {
+      colorList.add(myColorList[categories.length]);
+      _dataList.add(
+          PieDescItem(
+              id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: 0)
+      );
+    }
 
     balance = budget.initialBalance;
     balance = balance - total_spent;
+
+
 
     activities = await db_helper.getActivity();
 
