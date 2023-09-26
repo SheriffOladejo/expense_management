@@ -162,7 +162,7 @@ class _StatisticsState extends State<Statistics> {
                             Padding(
                               padding: const EdgeInsets.only(right: 30),
                               child: Text(
-                                diffPct >= 0 ? "+${diffPct.toStringAsFixed(1)}% from last week" : "$diffPct% from last week",
+                                selectedDateOption == "This week" ? diffPct >= 0 ? "+${diffPct.toStringAsFixed(1)}% from last week" : "$diffPct% from last week" : "",
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -603,6 +603,7 @@ class _StatisticsState extends State<Statistics> {
     int weekNumber = (days / 7).ceil();
     return weekNumber;
   }
+
   Future<void> groupActivities() async {
     for (String week in activityGroups.keys) {
       for (String day in dayNames) {

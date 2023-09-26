@@ -95,9 +95,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
+            Container(height: 15,),
+            GestureDetector(
+              onTap: () async {
+
+              },
+              child: Container(
+                height: 72,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  color: HexColor("#1B1B1B"),
+                ),
+                child: Row(
+                  children: [
+                    Container(width: 15,),
+                    Image.asset("assets/images/delete.png", color: Colors.red,),
+                    Container(width: 10,),
+                    Text("Delete account", style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      fontFamily: 'inter-regular',
+                    ),),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class ConfirmationDialog extends StatelessWidget {
+  final Function onConfirm;
+
+  ConfirmationDialog({this.onConfirm});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Confirm Deletion", style: TextStyle(
+        color: Colors.black
+      ),),
+      content: Text("Are you sure you want to delete your account and data? This action cannot be undone."),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: () {
+            onConfirm();
+            Navigator.of(context).pop();
+          },
+          child: Text("Confirm"),
+        ),
+      ],
     );
   }
 }

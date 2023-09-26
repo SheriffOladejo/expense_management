@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   double balance;
   List<Category> categories = [];
   List<Activity> activities = [];
+  List<Activity> dateActivities = [];
   List<Activity> catActivity = [];
 
   Category selectedCategory;
@@ -85,18 +86,6 @@ class _HomePageState extends State<HomePage> {
 
   Category selectionCallback () {
     return selectedCategory;
-  }
-
-  Future<void> filterActivities () {
-    catActivity.clear();
-    for (var i = 0; i < activities.length; i++) {
-      if (activities[i].category_id == selectedCategory.id) {
-        catActivity.add(activities[i]);
-      }
-    }
-    setState(() {
-
-    });
   }
 
   @override
@@ -153,8 +142,9 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () {
-                                    selectDate(context);
+                                  onTap: () async {
+                                    await selectDate(context);
+                                    filterActivitiesByDate();
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(10),
@@ -435,13 +425,43 @@ class _HomePageState extends State<HomePage> {
                           return ActivityAdapter(
                             activity: selectedCategory == null ? activities[index] : catActivity[index],
                           );
-                        }),
+                        })
                   ),
                 ]),
               ),
             ],
           ),
         ));
+  }
+
+  Future<void> filterActivities () async {
+    catActivity.clear();
+    for (var i = 0; i < activities.length; i++) {
+      if (activities[i].category_id == selectedCategory.id) {
+        catActivity.add(activities[i]);
+      }
+    }
+    setState(() {
+
+    });
+  }
+
+  Future<void> filterActivitiesByDate() async {
+    dateActivities.clear();
+    activities = await db_helper.getActivity();
+    for (var i = 0; i < activities.length; i++) {
+      DateTime activityDate = DateTime.fromMillisecondsSinceEpoch(activities[i].time);
+
+      if (activityDate.year == selectedDate.year &&
+          activityDate.month == selectedDate.month &&
+          activityDate.day == selectedDate.day) {
+        dateActivities.add(activities[i]);
+      }
+    }
+    activities = dateActivities;
+    setState(() {
+
+    });
   }
 
   Future<void> selectDate(BuildContext context) async {

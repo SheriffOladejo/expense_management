@@ -89,7 +89,7 @@ OutlineInputBorder enabledBorder() {
 }
 
 String formatMoney(double amount) {
-  final formatter = NumberFormat('#,##0', 'en_US'); // Adjust the locale as needed
+  final formatter = NumberFormat('#,##0.0', 'en_US');
   return formatter.format(amount);
 }
 

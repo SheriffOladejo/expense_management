@@ -37,6 +37,7 @@ class _EnterAmountState extends State<EnterAmount> {
 
   final form = GlobalKey<FormState>();
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -213,6 +214,9 @@ class _EnterAmountState extends State<EnterAmount> {
                       if (value.isEmpty) {
                         return "Required";
                       }
+                      else if (double.parse(value) > balance) {
+                        return "Exceeds remaining balance";
+                      }
                       return null;
                     },
                     textAlignVertical: TextAlignVertical.bottom,
@@ -316,12 +320,20 @@ class _EnterAmountState extends State<EnterAmount> {
       }
     }
     List<Category> categories = await db_helper.getCategories();
+    List<Activity> list = await db_helper.getActivity();
+
+    for (var j = 0; j < list.length; j++) {
+      total_spent += list[j].amount;
+    }
     remaining = budget.budget;
     for (var i = 0; i < categories.length; i++) {
       remaining -= categories[i].budget;
     }
     balance = budget.initialBalance;
     balance = balance - total_spent;
+    if (balance < 0) {
+      balance = 0;
+    }
     setState(() {
       isLoading = false;
     });

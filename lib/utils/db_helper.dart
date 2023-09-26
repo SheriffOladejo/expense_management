@@ -200,9 +200,17 @@ class DbHelper {
   }
 
   Future<List<Activity>> getActivity () async {
+    Budget budget;
+    List<Budget> budgets = await getBudgets();
+    for (var i = 0; i < budgets.length; i++) {
+      if (budgets[i].endDate > DateTime.now().millisecondsSinceEpoch) {
+        budget = budgets[i];
+      }
+    }
     List<Activity> list = [];
     Database db = await database;
-    String query = "select * from $activity_table order by $col_activity_time desc";
+    String query = "select * from $activity_table where $col_activity_time > ${budget.startDate} "
+        "and $col_activity_time < ${budget.endDate} order by $col_activity_time desc";
     List<Map<String, Object>> result = await db.rawQuery(query);
     for (var i = 0; i < result.length; i++) {
       list.add(
