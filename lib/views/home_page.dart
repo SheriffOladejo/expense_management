@@ -9,7 +9,10 @@ import 'package:expense_management/models/user.dart';
 import 'package:expense_management/utils/db_helper.dart';
 import 'package:expense_management/utils/hex_color.dart';
 import 'package:expense_management/utils/methods.dart';
+import 'package:expense_management/views/new_budget.dart';
+import 'package:expense_management/views/select_category.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' as found;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
@@ -60,9 +63,9 @@ class _HomePageState extends State<HomePage> {
     HexColor("#4287F5"),
     HexColor("#00C3C3"),
     HexColor("#FF6B6B"),
-    HexColor("#4CAF50"),
-    HexColor("#FFC107"),
-    HexColor("#673AB7"),
+    HexColor("#FFF000"),
+    HexColor("#303030"),
+    HexColor("#000000"),
     HexColor("#FF5722"),
     HexColor("#795548"),
     HexColor("#9C27B0"),
@@ -88,6 +91,54 @@ class _HomePageState extends State<HomePage> {
     return selectedCategory;
   }
 
+  Future<void> calculate () async {
+    categories = await db_helper.getCategories();
+    colorList.clear();
+    total_spent = 0;
+    _dataList.clear();
+    remaining = budget.budget;
+
+    for (var i = 0; i < categories.length; i++) {
+
+      colorList.add(myColorList[i]);
+
+      List<Activity> list = await db_helper.getActivityByCategory(categories[i].id);
+
+      double total = 0;
+      for (var j = 0; j < list.length; j++) {
+        total += list[j].amount;
+      }
+      total_spent += total;
+      dataMap[categories[i].title] = total;
+      _dataList.add(
+          PieDescItem(
+              id: i, color: myColorList[i], category: categories[i].title, total_spent: total)
+      );
+    }
+    remaining -= total_spent;
+    if (remaining > 0) {
+      dataMap["Remainder"] = remaining;
+      colorList.add(myColorList[categories.length]);
+      _dataList.add(
+          PieDescItem(
+              id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: remaining)
+      );
+    }
+    else if (remaining <= 0) {
+      colorList.add(myColorList[categories.length]);
+      _dataList.add(
+          PieDescItem(
+              id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: 0)
+      );
+    }
+
+    balance = budget.initialBalance;
+    balance = balance - total_spent;
+
+    activities = await db_helper.getActivity();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     formattedDate = DateFormat('MMM d').format(selectedDate);
@@ -103,6 +154,14 @@ class _HomePageState extends State<HomePage> {
                 fontFamily: 'satoshi-bold',
                 fontSize: 16,
               )),
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: GestureDetector(
+            child: Icon(Icons.add),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SelectCategory(callback: calculate)));
+            },
+          ),
         ),
         body: Container(
           color: Colors.white,
@@ -523,14 +582,14 @@ class _HomePageState extends State<HomePage> {
     remaining -= total_spent;
     if (remaining > 0) {
       dataMap["Remainder"] = remaining;
-      colorList.add(myColorList[categories.length]);
+      colorList.add(myColorList[myColorList.length - 1]);
       _dataList.add(
           PieDescItem(
               id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: remaining)
       );
     }
     else if (remaining <= 0) {
-      colorList.add(myColorList[categories.length]);
+      colorList.add(myColorList[myColorList.length - 1]);
       _dataList.add(
           PieDescItem(
               id: DateTime.now().millisecondsSinceEpoch, color: colorList[categories.length], category: "Remainder", total_spent: 0)
@@ -540,7 +599,80 @@ class _HomePageState extends State<HomePage> {
     balance = budget.initialBalance;
     balance = balance - total_spent;
 
-
+    if (DateTime.now().millisecondsSinceEpoch > budget.endDate) {
+      showDialog(
+        useSafeArea: false,
+        barrierDismissible: false,
+        context: context, builder: (_) {
+          return WillPopScope(
+            onWillPop: () async {
+              return false;
+            },
+            child: Container(
+              alignment: Alignment.center,
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              color: Colors.white,
+              padding: const EdgeInsets.all(15),
+              child: Column (
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset("assets/images/expired_budget.png", width: 50, height: 50,),
+                  Container(height: 20,),
+                  Text("Your budget for the period has expired", style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'satoshi-medium',
+                    fontSize: 18,
+                  ),),
+                  Container(height: 20,),
+                  Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width,
+                    margin: const EdgeInsets.only(bottom: 45),
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 15, right: 15),
+                      child: MaterialButton(
+                        minWidth: MediaQuery.of(context).size.width,
+                        height: 45,
+                        color: HexColor("#206CDF"),
+                        onPressed: () async {
+                          Navigator.pushReplacement(_, MaterialPageRoute(builder: (context) => NewBudget()));
+                        },
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(3))),
+                        elevation: 5,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 10,
+                            ),
+                            Text(
+                              "Create a new budget",
+                              style: TextStyle(
+                                color: HexColor("#ffffff"),
+                                fontFamily: 'satoshi-medium',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Container(
+                              width: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }
+      );
+    }
 
     activities = await db_helper.getActivity();
 
@@ -552,8 +684,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    init();
     super.initState();
+    init();
   }
 
 }

@@ -594,7 +594,9 @@ class _StatisticsState extends State<Statistics> {
     if (prevTotal == 0) {
       diffPct = 0.0; // Avoid division by zero
     }
-    diffPct = ((total_spent - prevTotal) / prevTotal) * 100.0;
+    else {
+      diffPct = ((total_spent - prevTotal) / prevTotal) * 100.0;
+    }
   }
 
   int getWeekOfYear(DateTime date) {

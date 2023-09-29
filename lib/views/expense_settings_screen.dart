@@ -1,3 +1,7 @@
+import 'package:expense_management/models/user.dart';
+import 'package:expense_management/utils/db_helper.dart';
+import 'package:expense_management/views/expense_get_started.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_management/utils/hex_color.dart';
 import 'package:expense_management/utils/methods.dart';
@@ -11,6 +15,9 @@ class ExpenseSettingsScreen extends StatefulWidget {
 }
 
 class _ExpenseSettingsScreenState extends State<ExpenseSettingsScreen> {
+
+  final db_helper = DbHelper();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,9 +102,75 @@ class _ExpenseSettingsScreenState extends State<ExpenseSettingsScreen> {
                 ),
               ),
             ),
+            Container(height: 15,),
+            GestureDetector(
+              onTap: () async {
+                await showDialog(context: context, builder: (_) {return ConfirmationDialog(onConfirm: deleteAccount,);});
+              },
+              child: Container(
+                height: 72,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  color: HexColor("#ffffff"),
+                ),
+                child: Row(
+                  children: [
+                    Container(width: 15,),
+                    Image.asset("assets/images/delete.png", color: Colors.black, width: 24, height: 24,),
+                    Container(width: 10,),
+                    Text("Delete account", style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      fontFamily: 'inter-regular',
+                    ),),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> deleteAccount () async {
+    User user = await db_helper.getUser();
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}');
+    await databaseReference.remove();
+    await db_helper.deleteTables();
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ExpenseGetStarted()));
+  }
+
+}
+
+class ConfirmationDialog extends StatelessWidget {
+  final Function onConfirm;
+
+  ConfirmationDialog({this.onConfirm});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Confirm Deletion", style: TextStyle(
+          color: Colors.black
+      ),),
+      content: Text("Are you sure you want to delete your account and data? This action cannot be undone."),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: () {
+            onConfirm();
+            Navigator.of(context).pop();
+          },
+          child: Text("Confirm"),
+        ),
+      ],
     );
   }
 }

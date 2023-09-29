@@ -20,10 +20,13 @@ class _CreateAccountState extends State<CreateAccount> {
 
   final form = GlobalKey<FormState>();
 
-  final TextEditingController nameController = TextEditingController(text: "Sheriff");
-  final TextEditingController emailController = TextEditingController(text: "sherifffoladejo@gmail.com");
-  final TextEditingController passwordController = TextEditingController(text: "password");
-  final TextEditingController confirmController = TextEditingController(text: "pass");
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmController = TextEditingController();
+
+  bool showPassword = false;
+  bool showConfirmPassword = false;
 
   bool isLoading = false;
 
@@ -167,7 +170,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 Container(
                   height: 50,
                   child: TextFormField(
-                    obscureText: true,
+                    obscureText: !showPassword,
                     style: TextStyle(
                       color: Colors.black,
                       fontFamily: 'satoshi-medium',
@@ -195,6 +198,19 @@ class _CreateAccountState extends State<CreateAccount> {
                         fontFamily: 'satoshi-medium',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
+                      ),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            showPassword = !showPassword;
+                          });
+                        },
+                        child: Icon(
+                          showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(4.0),
@@ -227,7 +243,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 Container(
                   height: 50,
                   child: TextFormField(
-                    obscureText: true,
+                    obscureText: !showConfirmPassword,
                     style: TextStyle(
                       color: Colors.black,
                       fontFamily: 'satoshi-medium',
@@ -255,6 +271,19 @@ class _CreateAccountState extends State<CreateAccount> {
                         fontFamily: 'satoshi-medium',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
+                      ),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            showConfirmPassword = !showConfirmPassword;
+                          });
+                        },
+                        child: Icon(
+                          showConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(4.0),

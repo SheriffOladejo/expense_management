@@ -155,6 +155,24 @@ class DbHelper {
 
   }
 
+  Future<void> deleteTables () async {
+    Database db = await database;
+
+    String delete_cat_table = "truncate $category_table";
+    String delete_budget_table = "truncate $budget_table";
+    String delete_wallet_table = "truncate $wallet_table";
+    String delete_candle_table = "truncate $candle_data_table";
+    String delete_user_table = "truncate $user_table";
+    String delete_activity_table = "truncate $activity_table";
+
+    await db.execute(delete_cat_table);
+    await db.execute(delete_budget_table);
+    await db.execute(delete_wallet_table);
+    await db.execute(delete_candle_table);
+    await db.execute(delete_user_table);
+    await db.execute(delete_activity_table);
+  }
+
   factory DbHelper(){
     if(helper == null){
       helper = DbHelper._createInstance();
@@ -176,6 +194,13 @@ class DbHelper {
   }
 
   Future<void> saveActivity (Activity activity) async {
+    Budget budget;
+    List<Budget> budgets = await getBudgets();
+    for (var i = 0; i < budgets.length; i++) {
+      if (budgets[i].endDate > DateTime.now().millisecondsSinceEpoch) {
+        budget = budgets[i];
+      }
+    }
     Database db = await database;
     String query = "insert into $activity_table ($col_activity_cat_id, $col_activity_amount, $col_activity_title, "
         "$col_activity_time) values (${activity.category_id}, ${activity.amount}, '${activity.title}', ${activity.time})";
@@ -187,7 +212,7 @@ class DbHelper {
       "time": activity.time.toString(),
     };
     User user = await getUser();
-    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/activity/${activity.id.toString()}');
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/budgets/${budget.id}/activity/${activity.id.toString()}');
     try {
       await db.execute(query);
       await databaseReference.set(params);
@@ -227,9 +252,17 @@ class DbHelper {
   }
 
   Future<List<Activity>> getActivityByCategory (int cat_id) async {
+    Budget budget;
+    List<Budget> budgets = await getBudgets();
+    for (var i = 0; i < budgets.length; i++) {
+      if (budgets[i].endDate > DateTime.now().millisecondsSinceEpoch) {
+        budget = budgets[i];
+      }
+    }
     List<Activity> list = [];
     Database db = await database;
-    String query = "select * from $activity_table where $col_activity_cat_id = $cat_id order by $col_activity_time desc";
+    String query = "select * from $activity_table where $col_activity_cat_id = $cat_id and $col_activity_time > ${budget.startDate} "
+        "and $col_activity_time < ${budget.endDate} order by $col_activity_time desc";
     List<Map<String, Object>> result = await db.rawQuery(query);
     for (var i = 0; i < result.length; i++) {
       list.add(
@@ -269,9 +302,10 @@ class DbHelper {
     }
   }
 
-  Future<void> getActivityFB () async {
+  Future<void> getActivityFB (int budget_id) async {
+    print(budget_id);
     var user = await getUser();
-    DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/activity');
+    DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/budgets/$budget_id/activity');
     DataSnapshot snapshot = await databaseReference.get();
 
     if (snapshot.value != null) {
@@ -397,6 +431,21 @@ class DbHelper {
     }
   }
 
+  Future<void> saveBudget_ (Budget budget) async {
+    Database db = await database;
+    String query = "insert into $budget_table ($col_budget_id, $col_budget_start, $col_budget_end, $col_budget_budget, $col_budget_initial_balance) values ("
+        "${budget.id}, ${budget.startDate}, ${budget.endDate}, ${budget.budget}, ${budget.initialBalance})";
+
+    try {
+      await db.execute(query);
+      return true;
+    }
+    catch(e) {
+      showToast("Budget not saved");
+      return false;
+    }
+  }
+
   Future<void> saveBudget (Budget budget) async {
     Database db = await database;
     String query = "insert into $budget_table ($col_budget_id, $col_budget_start, $col_budget_end, $col_budget_budget, $col_budget_initial_balance) values ("
@@ -424,7 +473,7 @@ class DbHelper {
   Future<List<Budget>> getBudgets () async {
     List<Budget> budgets = [];
     Database db = await database;
-    String query = "select * from $budget_table order by $col_budget_end desc";
+    String query = "select * from $budget_table order by $col_budget_end asc";
     List<Map<String, Object>> result = await db.rawQuery(query);
     for (var i = 0; i < result.length; i++) {
       budgets.add(

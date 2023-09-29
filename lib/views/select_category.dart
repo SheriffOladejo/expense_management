@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 
 class SelectCategory extends StatefulWidget {
 
+  Function callback;
+  SelectCategory({this.callback});
+
   @override
   State<SelectCategory> createState() => _SelectCategoryState();
 
@@ -63,7 +66,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                     itemCount: categoryList.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (context, index) {
-                      return CategoryAdapter2(category: categoryList[index], callback: destroyCallback, context: context,);
+                      return CategoryAdapter2(category: categoryList[index], destroyCallback: destroyCallback, callback: widget.callback, context: context,);
                     }),
               ),
             ],
@@ -74,7 +77,7 @@ class _SelectCategoryState extends State<SelectCategory> {
   }
 
   Future<void> destroyCallback () {
-    //Navigator.pop(context);
+    Navigator.pop(context);
   }
 
   Future<void> callback (String emoji, String title, double budget, int id) async {

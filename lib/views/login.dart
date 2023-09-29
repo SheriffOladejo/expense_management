@@ -23,8 +23,8 @@ class _LoginState extends State<Login> {
 
   final form = GlobalKey<FormState>();
 
-  final emailController = TextEditingController(text: "sherifffoladejo@gmail.com");
-  final passwordController = TextEditingController(text: "password");
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   bool isLoading = false;
 
@@ -339,7 +339,7 @@ class _LoginState extends State<Login> {
                 endDate: endDate,
                 budget: _budget,
               );
-              await dbHelper.saveBudget(budget);
+              await dbHelper.saveBudget_(budget);
             }
           }
         });
@@ -368,13 +368,14 @@ class _LoginState extends State<Login> {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ExpenseBottomNav()));
       }
     }
-    print(accountFound);
 
     if (!accountFound) {
       showToast("Account not found");
     }
     else {
-      await dbHelper.getActivityFB();
+      if (budget != null) {
+        await dbHelper.getActivityFB(budget.id);
+      }
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ExpenseBottomNav()));
     }
 

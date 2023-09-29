@@ -23,7 +23,6 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
     return [
       HomePage(insightCallback: insightCallback),
       Statistics(),
-      SelectCategory(),
       Reports(),
       const ExpenseSettingsScreen(),
     ];
@@ -58,7 +57,7 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
           curve: Curves.ease,
           duration: Duration(milliseconds: 200),
         ),
-        navBarStyle: NavBarStyle.style15, // Choose the nav bar style with this property.
+        navBarStyle: NavBarStyle.style1, // Choose the nav bar style with this property.
         navBarHeight: MediaQuery.of(context).viewInsets.bottom > 0 ? 0.0 : kBottomNavigationBarHeight,
       ),
     );
@@ -116,17 +115,6 @@ class _ExpenseBottomNavState extends State<ExpenseBottomNav> {
         icon: ImageIcon(
           AssetImage("assets/images/stats.png"),
         ),
-        activeColorPrimary: HexColor("#194D9B"),
-        inactiveColorPrimary: HexColor("#AAAAAA"),
-      ),
-      PersistentBottomNavBarItem(
-        textStyle: TextStyle(
-          fontSize: 16,
-          fontFamily: 'inter-medium',
-          fontWeight: FontWeight.w500,
-          color: Colors.white,
-        ),
-        icon: Icon(Icons.add, color: Colors.white,),
         activeColorPrimary: HexColor("#194D9B"),
         inactiveColorPrimary: HexColor("#AAAAAA"),
       ),

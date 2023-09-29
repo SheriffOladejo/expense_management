@@ -19,8 +19,8 @@ class _NewBudgetState extends State<NewBudget> {
 
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
-  final budgetController = TextEditingController(text: "500");
-  final balanceController = TextEditingController(text: "10000");
+  final budgetController = TextEditingController();
+  final balanceController = TextEditingController();
 
   String currency = "";
 

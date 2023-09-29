@@ -7,7 +7,9 @@ class CategoryAdapter2 extends StatefulWidget {
   Category category;
   BuildContext context;
   Function callback;
+  Function destroyCallback;
   CategoryAdapter2({
+    this.destroyCallback,
     this.category,
     this.callback,
     this.context,
@@ -26,6 +28,7 @@ class _CategoryAdapter2State extends State<CategoryAdapter2> {
       onTap: () async {
         await Navigator.push(widget.context, MaterialPageRoute(builder: (context) => EnterAmount(category: widget.category,)));
         await widget.callback();
+        await widget.destroyCallback();
       },
       child: Container(
         decoration: BoxDecoration(

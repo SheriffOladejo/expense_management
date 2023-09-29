@@ -90,6 +90,7 @@ class _SelectCurrencyState extends State<SelectCurrency> {
                     showToast("Select a currency");
                   }
                   else {
+                    showToast("Creating currency please wait");
                     var user = await db_helper.getUser();
                     user.currency = selected_currency;
                     await db_helper.updateUser(user);
