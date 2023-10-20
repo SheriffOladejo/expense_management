@@ -24,13 +24,15 @@ class _ExpenseSettingsScreenState extends State<ExpenseSettingsScreen> {
       backgroundColor: HexColor("#ffffff"),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: HexColor("#ffffff"),
-        title: Text("Settings", style: TextStyle(
-          color: Colors.black,
-          fontFamily: 'satoshi-bold',
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-        ),),
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+        title: const Text("Settings",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'satoshi-bold',
+              fontSize: 16,
+            )),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -41,7 +43,7 @@ class _ExpenseSettingsScreenState extends State<ExpenseSettingsScreen> {
           children: [
             GestureDetector(
               onTap: () async {
-                var url = "https://lukka.tech/privacy-policy/";
+                var url = "https://docs.google.com/document/d/1guzj0NLZgtUnSX-O5nEMXdzyFj71uflkrbC39-bIUFk/edit?usp=sharing";
                 if(await canLaunch(url)){
                   await launch(url);
                 }
@@ -73,7 +75,7 @@ class _ExpenseSettingsScreenState extends State<ExpenseSettingsScreen> {
             Container(height: 15,),
             GestureDetector(
               onTap: () async {
-                var url = "https://lukka.tech/terms-of-use/";
+                var url = "https://docs.google.com/document/d/1E4gsoIfHJfkSBoz1VOcFdSMlKX8haWL4On8vH-_QtuY/edit?usp=sharing";
                 if(await canLaunch(url)){
                   await launch(url);
                 }
@@ -135,6 +137,7 @@ class _ExpenseSettingsScreenState extends State<ExpenseSettingsScreen> {
   }
 
   Future<void> deleteAccount () async {
+    showToast("Deleting account please wait");
     User user = await db_helper.getUser();
     final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}');
     await databaseReference.remove();

@@ -195,12 +195,14 @@ class _SelectCurrencyDialogState extends State<SelectCurrencyDialog> {
       title: const Text('Choose your currency'),
       content: Container(
         height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Divider(),
             Container(
-              height: MediaQuery.of(context).size.height - 260,
+              height: MediaQuery.of(context).size.height - 350,
+              width: MediaQuery.of(context).size.width,
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: currencies.length,

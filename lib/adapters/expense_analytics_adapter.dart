@@ -26,20 +26,25 @@ class _ExpenseAnalyticAdapterState extends State<ExpenseAnalyticAdapter> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(width: 5,),
-          Text(widget.category.emoji),
+          Container(width: 16,),
+          Text(widget.category.emoji, style: TextStyle(
+            color: Colors.black,
+            fontSize: 10,
+            fontFamily: 'satoshi-regular',
+            fontWeight: FontWeight.w600,
+          ),),
           Container(width: 5,),
           Container(
-            width: 100,
+            width: 50,
             child: Text(widget.category.title, style: TextStyle(
               color: Colors.black,
-              fontFamily: 'inter-regular',
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
+              fontSize: 10,
+              fontFamily: 'satoshi-regular',
+              fontWeight: FontWeight.w600,
             ),),
           ),
+          Container(width: 80,),
           Container(
-            alignment: Alignment.center,
             width: 100,
             child: Text("${widget.currency} ${formatMoney(widget.category.budget)}", style: TextStyle(
               color: Colors.black,
@@ -48,17 +53,14 @@ class _ExpenseAnalyticAdapterState extends State<ExpenseAnalyticAdapter> {
               fontWeight: FontWeight.w600,
             ),),
           ),
-          Container(
-            alignment: Alignment.centerRight,
-            width: 100,
-            child: Text("${widget.currency} ${formatMoney(widget.category.spent)}", style: TextStyle(
-              color: Colors.black,
-              fontSize: 10,
-              fontFamily: 'satoshi-regular',
-              fontWeight: FontWeight.w600,
-            ),),
-          ),
-          Container(width: 8,),
+          const Spacer(),
+          Text("${widget.currency} ${formatMoney(widget.category.spent)}", style: TextStyle(
+            color: Colors.black,
+            fontSize: 10,
+            fontFamily: 'satoshi-regular',
+            fontWeight: FontWeight.w600,
+          ),),
+          Container(width: 20,),
         ],
       ),
     );

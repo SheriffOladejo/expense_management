@@ -42,7 +42,7 @@ class _WalletSplashState extends State<WalletSplash> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/images/_icon.png", width: 100, height: 100,),
+            Image.asset("assets/images/logo.png", width: 100, height: 100,),
           ],
         ),
       ),

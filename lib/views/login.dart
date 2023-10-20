@@ -11,6 +11,7 @@ import 'package:expense_management/views/new_budget.dart';
 import 'package:expense_management/views/select_currency.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Login extends StatefulWidget {
 
@@ -39,7 +40,7 @@ class _LoginState extends State<Login> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: Image.asset("assets/images/_icon.png", width: 50, height: 50,),
+        title: Image.asset("assets/images/logo.png", width: 50, height: 50,),
         centerTitle: true,
       ),
       body: Form(
@@ -204,41 +205,6 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                 ),
-                Container(height: 20,),
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 0, right: 0),
-                //   child: MaterialButton(
-                //     minWidth: MediaQuery.of(context).size.width,
-                //     height: 45,
-                //     color: HexColor("#ffffff"),
-                //     onPressed: () {
-                //
-                //     },
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.all(Radius.circular(3)),
-                //       side: BorderSide(
-                //         color: HexColor("#206CDF"),
-                //         width: 1.0,
-                //       ),
-                //     ),
-                //     elevation: 5,
-                //     child: Row(
-                //       mainAxisSize: MainAxisSize.min,
-                //       children: [
-                //         Container(width: 10,),
-                //         Image.asset("assets/images/google.png", width: 24, height: 24,),
-                //         Container(width: 10,),
-                //         const Text("Login with Google", style: TextStyle(
-                //           color: Colors.black,
-                //           fontFamily: 'inter-medium',
-                //           fontSize: 16,
-                //           fontWeight: FontWeight.w500,
-                //         ),),
-                //         Container(width: 10,),
-                //       ],
-                //     ),
-                //   ),
-                // ),
                 Container(height: 40,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -263,6 +229,77 @@ class _LoginState extends State<Login> {
                       ),),
                     ),
                   ],
+                ),
+                Container(height: 20,),
+                Container(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              "Before using this app, you can review our",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'satoshi-medium',
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () async {
+                                var url = "https://docs.google.com/document/d/1guzj0NLZgtUnSX-O5nEMXdzyFj71uflkrbC39-bIUFk/edit?usp=sharing";
+                                if(await canLaunch(url)){
+                                  await launch(url);
+                                }
+                                else{
+                                  showToast("Cannot launch URL");
+                                }
+                              },
+                              child: const Text(
+                                "privacy policy ",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'satoshi-medium',
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                            const Text(
+                              "and ",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'satoshi-medium',
+                                color: Colors.black,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                var url = "https://docs.google.com/document/d/1E4gsoIfHJfkSBoz1VOcFdSMlKX8haWL4On8vH-_QtuY/edit?usp=sharing";
+                                if(await canLaunch(url)){
+                                  await launch(url);
+                                }
+                                else{
+                                  showToast("Cannot launch URL");
+                                }
+                              },
+                              child: const Text(
+                                "terms of use. ",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'satoshi-medium',
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],)
                 ),
               ],
             ),
@@ -373,10 +410,14 @@ class _LoginState extends State<Login> {
       showToast("Account not found");
     }
     else {
+      if (user.currency == '' || user.currency == null) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SelectCurrency()));
+      }
       if (budget != null) {
         await dbHelper.getActivityFB(budget.id);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ExpenseBottomNav()));
       }
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ExpenseBottomNav()));
+
     }
 
     setState(() {

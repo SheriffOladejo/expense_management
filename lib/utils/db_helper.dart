@@ -158,12 +158,12 @@ class DbHelper {
   Future<void> deleteTables () async {
     Database db = await database;
 
-    String delete_cat_table = "truncate $category_table";
-    String delete_budget_table = "truncate $budget_table";
-    String delete_wallet_table = "truncate $wallet_table";
-    String delete_candle_table = "truncate $candle_data_table";
-    String delete_user_table = "truncate $user_table";
-    String delete_activity_table = "truncate $activity_table";
+    String delete_cat_table = "delete from $category_table";
+    String delete_budget_table = "delete from $budget_table";
+    String delete_wallet_table = "delete from $wallet_table";
+    String delete_candle_table = "delete from $candle_data_table";
+    String delete_user_table = "delete from $user_table";
+    String delete_activity_table = "delete from $activity_table";
 
     await db.execute(delete_cat_table);
     await db.execute(delete_budget_table);
@@ -300,6 +300,12 @@ class DbHelper {
       showToast("Category not saved");
       return false;
     }
+  }
+
+  Future<void> deleteCategory (int id) async {
+    Database db = await database;
+    String query = "delete from $category_table where $col_cat_id = $id";
+    await db.execute(query);
   }
 
   Future<void> getActivityFB (int budget_id) async {

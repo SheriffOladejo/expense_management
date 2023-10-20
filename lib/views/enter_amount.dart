@@ -22,8 +22,8 @@ class EnterAmount extends StatefulWidget {
 
 class _EnterAmountState extends State<EnterAmount> {
 
-  final itemController = TextEditingController(text: "test");
-  final amountController = TextEditingController(text: "3");
+  final itemController = TextEditingController();
+  final amountController = TextEditingController();
   final budgetController = TextEditingController();
 
   var db_helper = DbHelper();
@@ -291,8 +291,8 @@ class _EnterAmountState extends State<EnterAmount> {
     setState(() {
       isLoading = true;
     });
-    if (isEditing && double.parse(budgetController.text) != widget.category.budget) {
-      widget.category.budget = double.parse(budgetController.text);
+    if (isEditing && double.parse(budgetController.text.isEmpty ? "0" : budgetController.text) != widget.category.budget) {
+      widget.category.budget = double.parse(budgetController.text.isEmpty ? "0" : budgetController.text);
       await db_helper.updateCategory(widget.category);
     }
     var act = Activity(

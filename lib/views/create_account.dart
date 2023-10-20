@@ -410,6 +410,31 @@ class _CreateAccountState extends State<CreateAccount> {
       "password": passwordController.text.toString(),
     };
 
+    final DatabaseReference checkEmailReference = FirebaseDatabase.instance.ref().child('data/users');
+
+    DataSnapshot dataSnapshot = await checkEmailReference.get();
+
+    bool emailExists = false;
+
+    if (dataSnapshot != null && dataSnapshot.value != null) {
+      Map<dynamic, dynamic> users = dataSnapshot.value;
+      users.forEach((key, value) {
+        if (value['email'] == emailController.text.trim().toString()) {
+          emailExists = true;
+          return;
+        }
+      });
+    }
+
+    if (emailExists) {
+      showToast("User with this email already exists");
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+
     final DatabaseReference databaseReference =
     FirebaseDatabase.instance.ref().child('data/users/$id');
 

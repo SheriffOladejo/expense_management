@@ -20,7 +20,8 @@ class _ExpenseGetStartedState extends State<ExpenseGetStarted> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: HexColor("#206CDF"),
-        title: Image.asset("assets/images/_icon.png", width: 50, height: 50,),
+        title: Image.asset("assets/images/logo.png", width: 50, height: 50,),
+        centerTitle: false,
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -28,10 +29,10 @@ class _ExpenseGetStartedState extends State<ExpenseGetStarted> {
         padding: const EdgeInsets.all(15),
         color: HexColor("#206CDF"),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Spacer(),
                 Image.asset("assets/images/pie.png", width: 160, height: 160,),
                 Container(width: 20,),
               ],
@@ -51,16 +52,13 @@ class _ExpenseGetStartedState extends State<ExpenseGetStarted> {
             Container(
               height: 10,
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Text(
-                "Budget, Track and manage your finances effortlessly",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'satoshi-medium',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
+            Text(
+              "Budget, Track and manage your finances effortlessly",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'satoshi-medium',
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
               ),
             ),
           ],

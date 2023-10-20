@@ -136,6 +136,9 @@ class _HomePageState extends State<HomePage> {
     balance = balance - total_spent;
 
     activities = await db_helper.getActivity();
+    setState(() {
+
+    });
 
   }
 
@@ -159,7 +162,7 @@ class _HomePageState extends State<HomePage> {
           child: GestureDetector(
             child: Icon(Icons.add),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SelectCategory(callback: calculate)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SelectCategory(callback: init)));
             },
           ),
         ),
@@ -342,7 +345,7 @@ class _HomePageState extends State<HomePage> {
                 delegate: SliverChildListDelegate([
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    height: 50,
+                    height: 60,
                     padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
                     child: ListView.builder(
                         shrinkWrap: true,
@@ -550,6 +553,8 @@ class _HomePageState extends State<HomePage> {
       is_loading = true;
     });
 
+    colorList.clear();
+    _dataList.clear();
     List<Budget> budgets = await db_helper.getBudgets();
     for (var i = 0; i < budgets.length; i++) {
       if (budgets[i].endDate > DateTime.now().millisecondsSinceEpoch) {

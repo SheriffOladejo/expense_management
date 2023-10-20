@@ -153,6 +153,7 @@ class _AllocateBudgetState extends State<AllocateBudget> {
     categoryList.removeWhere((element) {
       return element.id == id;
     });
+    await db_helper.deleteCategory(id);
     DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('data/users/${user.id}/categories/$id');
     setState(() {
 

@@ -49,7 +49,7 @@ class _CategoryAdapterState extends State<CategoryAdapter> {
         ),
         margin: const EdgeInsets.only(left: 5, right: 5),
         width: 80,
-        height: 50,
+        height: 60,
         padding: const EdgeInsets.all(5),
         child: Column(
           children: [
